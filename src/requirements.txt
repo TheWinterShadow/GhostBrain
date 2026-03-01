@@ -1,5 +1,0 @@
-pipecat-ai[websocket,deepgram,groq,openai,silero]
-fastapi
-uvicorn[standard]
-google-cloud-storage
-python-dotenv
