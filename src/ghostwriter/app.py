@@ -1,0 +1,63 @@
+"""FastAPI app and WebSocket endpoint for the Ghostwriter voice bot."""
+
+import logging
+
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+
+from ghostwriter.__about__ import __version__
+from ghostwriter.config import get_settings
+from ghostwriter.pipeline import build_pipeline
+from ghostwriter.runner import register_handlers, run_pipeline
+from ghostwriter.transport import create_twilio_serializer, create_transport
+
+logger = logging.getLogger(__name__)
+
+app = FastAPI(
+    title="Ghostwriter",
+    description="Voice-interviewer bot via Twilio WebSocket and Pipecat.",
+    version=__version__,
+)
+
+
+@app.get("/health")
+async def health() -> dict[str, str]:
+    """Health check for load balancers and Cloud Run."""
+    return {"status": "ok"}
+
+
+@app.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket) -> None:
+    """
+    Accept Twilio Media Streams WebSocket, run Pipecat pipeline, save transcript on disconnect.
+    """
+    await websocket.accept()
+    settings = get_settings()
+
+    try:
+        from pipecat.runner.utils import parse_telephony_websocket
+
+        transport_type, call_data = await parse_telephony_websocket(websocket)
+    except Exception as e:
+        logger.exception("Failed to parse telephony WebSocket: %s", e)
+        await websocket.close(code=4500)
+        return
+
+    if transport_type != "twilio":
+        logger.warning("Unsupported transport type: %s", transport_type)
+        await websocket.close(code=4500)
+        return
+
+    session_id = call_data.get("call_id", "") or "unknown"
+    serializer = create_twilio_serializer(call_data, settings)
+    transport = create_transport(websocket, serializer)
+    _, task, context = build_pipeline(transport, settings, sample_rate=8000)
+    register_handlers(transport, task, context, settings, session_id)
+
+    try:
+        await run_pipeline(task)
+    except WebSocketDisconnect:
+        logger.info("WebSocket disconnected for session %s", session_id)
+    except Exception as e:
+        logger.exception("Pipeline error for session %s: %s", session_id, e)
+    finally:
+        await task.cancel()

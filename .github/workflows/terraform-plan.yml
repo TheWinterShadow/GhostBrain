@@ -1,0 +1,36 @@
+# Terraform plan on PRs (optional: require plan approval for apply).
+
+name: Terraform plan
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "terraform/**"
+      - ".github/workflows/terraform-plan.yml"
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.5.0"
+
+      - name: Terraform init
+        working-directory: terraform
+        run: terraform init -backend=false
+        env:
+          # Use dummy vars for plan on PR; real values in deploy
+          TF_VAR_project_id: ${{ secrets.TF_VAR_project_id || 'dummy-project' }}
+          TF_VAR_cloud_run_image: ${{ secrets.TF_VAR_cloud_run_image || 'gcr.io/dummy/ghostwriter:latest' }}
+
+      - name: Terraform plan
+        working-directory: terraform
+        run: terraform plan -no-color -input=false
+        env:
+          TF_VAR_project_id: ${{ secrets.TF_VAR_project_id || 'dummy-project' }}
+          TF_VAR_cloud_run_image: ${{ secrets.TF_VAR_cloud_run_image || 'gcr.io/dummy/ghostwriter:latest' }}

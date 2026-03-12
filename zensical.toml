@@ -1,0 +1,13 @@
+# Zensical configuration for Ghostwriter docs.
+
+[project]
+site_name = "Ghostwriter"
+site_url = "https://github.com/ghostwriter/ghostwriter"
+site_description = "Voice-interviewer bot documentation"
+docs_dir = "docs"
+site_dir = "site"
+nav = [
+  { "Home" = "index.md" },
+  { "Status" = "status.md" },
+  { "API Reference" = "/api/" }
+]

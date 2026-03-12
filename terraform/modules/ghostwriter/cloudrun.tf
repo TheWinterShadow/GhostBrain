@@ -1,0 +1,106 @@
+resource "google_cloud_run_v2_service" "ghostwriter_bot" {
+  name     = var.ghostwriter_service_name
+  location = var.region
+  project  = var.project_id
+
+  template {
+    service_account = google_service_account.ghostwriter_bot.email
+
+    scaling {
+      min_instance_count = 0
+      max_instance_count = 10
+    }
+
+    containers {
+      image = var.cloud_run_image
+
+      ports {
+        container_port = 8080
+      }
+
+      env {
+        name  = "GCP_BUCKET_NAME"
+        value = google_storage_bucket.transcript_bucket.name
+      }
+
+      env {
+        name = "GROQ_API_KEY"
+        value_source {
+          secret_key_ref {
+            secret  = google_secret_manager_secret.groq_api_key.secret_id
+            version = "latest"
+          }
+        }
+      }
+
+      env {
+        name = "DEEPGRAM_API_KEY"
+        value_source {
+          secret_key_ref {
+            secret  = google_secret_manager_secret.deepgram_api_key.secret_id
+            version = "latest"
+          }
+        }
+      }
+
+      env {
+        name = "OPENAI_API_KEY"
+        value_source {
+          secret_key_ref {
+            secret  = google_secret_manager_secret.openai_api_key.secret_id
+            version = "latest"
+          }
+        }
+      }
+
+      env {
+        name = "TWILIO_ACCOUNT_SID"
+        value_source {
+          secret_key_ref {
+            secret  = google_secret_manager_secret.twilio_account_sid.secret_id
+            version = "latest"
+          }
+        }
+      }
+
+      env {
+        name = "TWILIO_AUTH_TOKEN"
+        value_source {
+          secret_key_ref {
+            secret  = google_secret_manager_secret.twilio_auth_token.secret_id
+            version = "latest"
+          }
+        }
+      }
+
+      resources {
+        limits = {
+          cpu    = "1"
+          memory = "512Mi"
+        }
+      }
+    }
+  }
+
+  traffic {
+    type    = "TRAFFIC_TARGET_ALLOCATION_TYPE_LATEST"
+    percent = 100
+  }
+
+  depends_on = [
+    google_project_service.run,
+    google_secret_manager_secret.groq_api_key,
+    google_secret_manager_secret.deepgram_api_key,
+    google_secret_manager_secret.openai_api_key,
+    google_secret_manager_secret.twilio_account_sid,
+    google_secret_manager_secret.twilio_auth_token,
+  ]
+}
+
+# Allow unauthenticated invocations so Twilio can reach the WebSocket endpoint.
+resource "google_cloud_run_v2_service_iam_member" "public_invoke" {
+  location = google_cloud_run_v2_service.ghostwriter_bot.location
+  name     = google_cloud_run_v2_service.ghostwriter_bot.name
+  role     = "roles/run.invoker"
+  member   = "allUsers"
+}
