@@ -32,4 +32,4 @@ class AudioLogger(FrameProcessor):
         elif isinstance(frame, TextFrame):
             logger.info("[%s] Text frame: %s", self._name, frame.text)
 
-        await self.push_frame(frame, direction)
+        await super().process_frame(frame, direction)
