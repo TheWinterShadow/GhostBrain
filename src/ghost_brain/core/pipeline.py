@@ -19,6 +19,33 @@ from ghost_brain.services.tts import create_tts
 logger = logging.getLogger(__name__)
 
 
+class DebugFrameLogger(FrameProcessor):
+    """Debug processor that logs all frames passing through."""
+
+    def __init__(self, name: str = "DebugLogger"):
+        super().__init__()
+        self.name = name
+        self.frame_count = 0
+        self.audio_frame_count = 0
+
+    async def process_frame(self, frame: Frame, direction: FrameDirection):
+        self.frame_count += 1
+
+        if isinstance(frame, InputAudioRawFrame):
+            self.audio_frame_count += 1
+            if self.audio_frame_count <= 10 or self.audio_frame_count % 100 == 0:
+                logger.info(
+                    f"{self.name}: Audio frame #{self.audio_frame_count} - "
+                    f"size={len(frame.audio) if frame.audio else 0} bytes, "
+                    f"sample_rate={frame.sample_rate}"
+                )
+        elif self.frame_count <= 20:  # Log first 20 frames of any type
+            frame_type = type(frame).__name__
+            logger.info(f"{self.name}: Frame #{self.frame_count} - {frame_type}")
+
+        await self.push_frame(frame, direction)
+
+
 class AudioResampler(FrameProcessor):
     """Processor to resample audio frames."""
 
@@ -32,12 +59,20 @@ class AudioResampler(FrameProcessor):
     async def process_frame(self, frame: Frame, direction: FrameDirection):
         # Handle StartFrame specially to ensure proper state tracking
         if "StartFrame" in str(type(frame)):
+            logger.debug("AudioResampler: Received StartFrame, forwarding")
             # For StartFrame, we MUST call super() first to set self._started = True
             await super().process_frame(frame, direction)
             # Don't return - continue to check if it's audio or pass through
 
         if isinstance(frame, InputAudioRawFrame):
+            logger.debug(
+                f"AudioResampler: Received audio frame - "
+                f"size={len(frame.audio) if frame.audio else 0} bytes, "
+                f"sample_rate={frame.sample_rate}, "
+                f"num_frames={frame.num_frames}"
+            )
             if not frame.audio or len(frame.audio) == 0:
+                logger.warning("AudioResampler: Received empty audio frame, skipping")
                 return
 
             # Resample audio using audioop (low latency)
@@ -50,11 +85,16 @@ class AudioResampler(FrameProcessor):
                     self._output_rate,
                     self._state,
                 )
+                logger.debug(
+                    f"AudioResampler: Resampled {len(frame.audio)} bytes -> "
+                    f"{len(resampled_audio)} bytes ({self._input_rate}Hz -> {self._output_rate}Hz)"
+                )
             except Exception as e:
-                logger.error(f"Resampling error: {e}")
+                logger.error(f"AudioResampler: Resampling error: {e}")
                 return
 
             if not resampled_audio or len(resampled_audio) == 0:
+                logger.warning("AudioResampler: Resampling resulted in empty audio")
                 return
 
             # Update frame with new audio and sample rate
@@ -67,6 +107,9 @@ class AudioResampler(FrameProcessor):
             await self.push_frame(frame, direction)
         else:
             # For non-audio frames, just push them through
+            frame_type = type(frame).__name__
+            if frame_type not in ["SystemFrame", "EndFrame"]:  # Don't log every system frame
+                logger.debug(f"AudioResampler: Forwarding non-audio frame: {frame_type}")
             await self.push_frame(frame, direction)
 
 
@@ -96,9 +139,13 @@ def build_pipeline(
     # If input is 8k, we need to upsample to 16k for STT/VAD
     resampler = AudioResampler(input_rate=sample_rate, output_rate=16000)
 
+    # Add debug logger to track frames from transport
+    debug_logger = DebugFrameLogger("TransportDebug")
+
     pipeline = Pipeline(
         [
             transport.input(),
+            debug_logger,  # Debug: log what comes from transport
             resampler,  # Upsample 8k -> 16k
             stt,  # Expects 16k
             user_agg,  # VAD expects 16k
