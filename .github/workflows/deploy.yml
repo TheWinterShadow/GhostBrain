@@ -115,6 +115,7 @@ jobs:
           tags: |
             type=sha,prefix=
             type=raw,value=latest
+            type=raw,value=${{ github.sha }}
 
       - name: Build and push
         uses: docker/build-push-action@v6
@@ -129,7 +130,7 @@ jobs:
     needs: build-and-push
     runs-on: ubuntu-latest
     env:
-      IMAGE_URI: ${{ secrets.GCP_REGISTRY_REGION || 'us-central1' }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/ghost-brain/ghost_brain-bot:latest
+      IMAGE_URI: ${{ secrets.GCP_REGISTRY_REGION || 'us-central1' }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/ghost-brain/ghost_brain-bot:${{ github.sha }}
     steps:
       - uses: actions/checkout@v4
 
