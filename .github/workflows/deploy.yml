@@ -103,6 +103,9 @@ jobs:
         run: |
           gcloud auth configure-docker ${{ secrets.GCP_REGISTRY_REGION || 'us-central1' }}-docker.pkg.dev --quiet
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
       - name: Docker meta
         id: meta
         uses: docker/metadata-action@v5
