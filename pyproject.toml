@@ -43,6 +43,7 @@ path = "src/ghost_brain/__about__.py"
 
 [tool.hatch.envs.default]
 python = "3.12"
+features = ["dev"]
 
 [tool.hatch.envs.default.scripts]
 test = "pytest"

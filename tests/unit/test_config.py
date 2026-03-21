@@ -9,14 +9,17 @@ from ghost_brain.config import Settings, get_settings
 
 def test_settings_loads_from_env(monkeypatch: pytest.MonkeyPatch) -> None:
     """Settings should read values from environment variables."""
-    monkeypatch.setenv("GROQ_API_KEY", "env-groq")
-    monkeypatch.setenv("DEEPGRAM_API_KEY", "env-dg")
-    monkeypatch.setenv("OPENAI_API_KEY", "env-openai")
-    monkeypatch.setenv("GCP_BUCKET_NAME", "env-bucket")
-    monkeypatch.setenv("TWILIO_ACCOUNT_SID", "env-sid")
-    monkeypatch.setenv("TWILIO_AUTH_TOKEN", "env-token")
+    # Settings class has env_prefix="GHOST_BRAIN_", so we must use that prefix
+    monkeypatch.setenv("GHOST_BRAIN_GROQ_API_KEY", "env-groq")
+    monkeypatch.setenv("GHOST_BRAIN_DEEPGRAM_API_KEY", "env-dg")
+    monkeypatch.setenv("GHOST_BRAIN_OPENAI_API_KEY", "env-openai")
+    monkeypatch.setenv("GHOST_BRAIN_GCP_BUCKET_NAME", "env-bucket")
+    monkeypatch.setenv("GHOST_BRAIN_TWILIO_ACCOUNT_SID", "env-sid")
+    monkeypatch.setenv("GHOST_BRAIN_TWILIO_AUTH_TOKEN", "env-token")
+
     # Clear cache so we get fresh load
     import ghost_brain.config as m
+
     m._settings = None
     s = get_settings()
     assert s.groq_api_key == "env-groq"
@@ -30,12 +33,18 @@ def test_settings_loads_from_env(monkeypatch: pytest.MonkeyPatch) -> None:
 def test_settings_defaults() -> None:
     """Settings should have empty string defaults when env is unset."""
     import ghost_brain.config as m
+
     m._settings = None
-    # Ensure no env vars are set for these (or unset them)
-    for key in ("GROQ_API_KEY", "DEEPGRAM_API_KEY", "OPENAI_API_KEY",
-                "GCP_BUCKET_NAME", "TWILIO_ACCOUNT_SID", "TWILIO_AUTH_TOKEN"):
-        os.environ.pop(key, None)
-    s = Settings()
+
+    # Ensure no relevant env vars are set
+    # We only need to clear variables that start with the prefix
+    for key in list(os.environ.keys()):
+        if key.startswith("GHOST_BRAIN_"):
+            os.environ.pop(key)
+
+    # Pass _env_file=None to ignore any local .env file during testing
+    s = Settings(_env_file=None)
+
     assert s.groq_api_key == ""
     assert s.gcp_bucket_name == ""
 
@@ -43,6 +52,7 @@ def test_settings_defaults() -> None:
 def test_get_settings_caches() -> None:
     """get_settings should return the same instance on subsequent calls."""
     import ghost_brain.config as m
+
     m._settings = None
     a = get_settings()
     b = get_settings()
