@@ -22,9 +22,9 @@ logger = logging.getLogger(__name__)
 class DebugFrameLogger(FrameProcessor):
     """Debug processor that logs all frames passing through."""
 
-    def __init__(self, name: str = "DebugLogger"):
+    def __init__(self, label: str = "DebugLogger"):
         super().__init__()
-        self.name = name
+        self.label = label
         self.frame_count = 0
         self.audio_frame_count = 0
 
@@ -35,13 +35,13 @@ class DebugFrameLogger(FrameProcessor):
             self.audio_frame_count += 1
             if self.audio_frame_count <= 10 or self.audio_frame_count % 100 == 0:
                 logger.info(
-                    f"{self.name}: Audio frame #{self.audio_frame_count} - "
+                    f"{self.label}: Audio frame #{self.audio_frame_count} - "
                     f"size={len(frame.audio) if frame.audio else 0} bytes, "
                     f"sample_rate={frame.sample_rate}"
                 )
         elif self.frame_count <= 20:  # Log first 20 frames of any type
             frame_type = type(frame).__name__
-            logger.info(f"{self.name}: Frame #{self.frame_count} - {frame_type}")
+            logger.info(f"{self.label}: Frame #{self.frame_count} - {frame_type}")
 
         await self.push_frame(frame, direction)
 
