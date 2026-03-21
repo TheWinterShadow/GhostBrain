@@ -148,8 +148,7 @@ jobs:
         working-directory: terraform
         run: terraform init
         env:
-          TFC_CLIENT_ID: ${{ secrets.TFC_CLIENT_ID }}
-          TFC_CLIENT_SECRET: ${{ secrets.TFC_CLIENT_SECRET }}
+          TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
           TF_VAR_project_id: ${{ secrets.GCP_PROJECT_ID }}
           TF_VAR_cloud_run_image: ${{ env.IMAGE_URI }}
 
@@ -157,8 +156,7 @@ jobs:
         working-directory: terraform
         run: terraform plan -input=false
         env:
-          TFC_CLIENT_ID: ${{ secrets.TFC_CLIENT_ID }}
-          TFC_CLIENT_SECRET: ${{ secrets.TFC_CLIENT_SECRET }}
+          TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
           TF_VAR_project_id: ${{ secrets.GCP_PROJECT_ID }}
           TF_VAR_cloud_run_image: ${{ env.IMAGE_URI }}
           TF_VAR_groq_api_key: ${{ secrets.GROQ_API_KEY }}
@@ -171,8 +169,7 @@ jobs:
         working-directory: terraform
         run: terraform apply -auto-approve -input=false
         env:
-          TFC_CLIENT_ID: ${{ secrets.TFC_CLIENT_ID }}
-          TFC_CLIENT_SECRET: ${{ secrets.TFC_CLIENT_SECRET }}
+          TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
           TF_VAR_project_id: ${{ secrets.GCP_PROJECT_ID }}
           TF_VAR_cloud_run_image: ${{ env.IMAGE_URI }}
           TF_VAR_groq_api_key: ${{ secrets.GROQ_API_KEY }}
