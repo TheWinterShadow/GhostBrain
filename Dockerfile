@@ -12,7 +12,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 WORKDIR /app
 
 # Install Python package from repo (no dev deps)
-COPY pyproject.toml ./
+COPY pyproject.toml README.md ./
 COPY src ./src
 RUN pip install --no-cache-dir .
 
