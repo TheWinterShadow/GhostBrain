@@ -8,6 +8,9 @@ Requirements:
 
 Usage:
     python -m ghost_brain.local_mic_test
+
+IMPORTANT: Use headphones to prevent the bot from hearing itself through your speakers!
+           Without headphones, the bot will hear and respond to its own voice.
 """
 
 import asyncio
@@ -22,69 +25,24 @@ except ImportError:
     print("On macOS, you may need: brew install portaudio")
     sys.exit(1)
 
-from pipecat.audio.resamplers.soxr_stream_resampler import SOXRStreamAudioResampler
-from pipecat.audio.vad.silero import SileroVADAnalyzer
-from pipecat.audio.vad.vad_analyzer import VADParams
 from pipecat.frames.frames import (
     BotStartedSpeakingFrame,
     BotStoppedSpeakingFrame,
     Frame,
-    InputAudioRawFrame,
 )
 from pipecat.pipeline.base_task import PipelineTaskParams
 from pipecat.pipeline.pipeline import Pipeline
-from pipecat.pipeline.task import PipelineParams, PipelineTask
+from pipecat.pipeline.task import PipelineTask
 from pipecat.processors.aggregators.llm_context import LLMContext
-from pipecat.processors.aggregators.llm_response_universal import (
-    LLMContextAggregatorPair,
-    LLMUserAggregatorParams,
-)
 from pipecat.processors.frame_processor import FrameDirection, FrameProcessor
-from pipecat.services.deepgram.stt import DeepgramSTTService
-from pipecat.services.deepgram.tts import DeepgramTTSService
-from pipecat.services.groq.llm import GroqLLMService
 from pipecat.transports.local.audio import LocalAudioTransport, LocalAudioTransportParams
 
 from ghost_brain.config import Settings, get_settings
+from ghost_brain.core.pipeline import build_pipeline
 from ghost_brain.utils.transcript import format_transcript
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
-
-class AudioResampler(FrameProcessor):
-    """Processor to resample audio frames."""
-
-    def __init__(self, input_rate: int, output_rate: int):
-        super().__init__()
-        self._input_rate = input_rate
-        self._output_rate = output_rate
-        self._resampler = SOXRStreamAudioResampler()
-
-    async def process_frame(self, frame: Frame, direction: FrameDirection):
-        await super().process_frame(frame, direction)
-
-        if isinstance(frame, InputAudioRawFrame):
-            if not frame.audio or len(frame.audio) == 0:
-                # Skip empty frames to avoid STT warnings
-                return
-
-            # Resample audio
-            resampled_audio = await self._resampler.resample(
-                frame.audio, self._input_rate, self._output_rate
-            )
-
-            if not resampled_audio or len(resampled_audio) == 0:
-                return
-
-            # Update frame with new audio and sample rate
-            frame.audio = resampled_audio
-            frame.sample_rate = self._output_rate
-
-            # Recalculate num_frames since length changed
-            frame.num_frames = int(len(frame.audio) / (frame.num_channels * 2))
-
-        await self.push_frame(frame, direction)
 
 
 class MuteInputMonitor(FrameProcessor):
@@ -95,8 +53,6 @@ class MuteInputMonitor(FrameProcessor):
         self.input_transport = input_transport
 
     async def process_frame(self, frame: Frame, direction: FrameDirection):
-        await super().process_frame(frame, direction)
-
         if isinstance(frame, BotStartedSpeakingFrame):
             logger.info("Bot started speaking - muting input")
             self.input_transport._params.audio_in_enabled = False
@@ -104,7 +60,7 @@ class MuteInputMonitor(FrameProcessor):
             logger.info("Bot stopped speaking - unmuting input")
             self.input_transport._params.audio_in_enabled = True
 
-        await self.push_frame(frame, direction)
+        await super().process_frame(frame, direction)
 
 
 class LocalMicrophoneBot:
@@ -126,78 +82,17 @@ class LocalMicrophoneBot:
         )
 
     def build_pipeline(self) -> tuple[Pipeline, PipelineTask]:
-        """Build the voice pipeline with local microphone transport."""
+        """Build the voice pipeline using the production pipeline builder."""
 
-        # Create VAD and aggregators
-        vad_analyzer = SileroVADAnalyzer(
-            sample_rate=16000,
-            params=VADParams(
-                stop_secs=0.5,  # Slightly longer pause detection for local testing
-                min_volume=0.1,
-            ),
+        # Use the core build_pipeline function but pass our local transport
+        pipeline, task, context = build_pipeline(
+            transport=self.transport, settings=self.settings, sample_rate=8000
         )
+        self.context = context
 
-        user_params = LLMUserAggregatorParams(vad_analyzer=vad_analyzer)
-        user_aggregator, assistant_aggregator = LLMContextAggregatorPair(
-            self.context,
-            user_params=user_params,
-        )
-
-        # Resampler: 8k (Input) -> 16k (STT/VAD)
-        resampler_in = AudioResampler(input_rate=8000, output_rate=16000)
-
-        # Create services
-        stt = DeepgramSTTService(
-            api_key=self.settings.deepgram_api_key,
-            sample_rate=16000,  # Use standard 16k for STT
-            settings=DeepgramSTTService.Settings(model="nova-2"),
-        )
-
-        llm = GroqLLMService(
-            api_key=self.settings.groq_api_key,
-            settings=GroqLLMService.Settings(
-                model="llama-3.3-70b-versatile",
-                system_instruction=(
-                    "You are Ghost Brain, a friendly voice interviewer. "
-                    "Keep responses concise and natural for spoken conversation. "
-                    "Ask one question at a time and listen before continuing. "
-                    "Start by greeting the user and asking how you can help them today."
-                ),
-            ),
-        )
-
-        # TTS at 8k
-        tts = DeepgramTTSService(
-            api_key=self.settings.deepgram_api_key,
-            sample_rate=8000,
-            settings=DeepgramTTSService.Settings(voice="aura-2-orpheus-en"),
-        )
-
-        # Build pipeline
-        mute_monitor = MuteInputMonitor(self.transport.input())
-
-        pipeline = Pipeline(
-            [
-                self.transport.input(),
-                resampler_in,  # Upsample input to 16k
-                stt,  # Expects 16k
-                user_aggregator,
-                llm,
-                tts,  # Output 8k
-                mute_monitor,
-                self.transport.output(),
-                assistant_aggregator,
-            ]
-        )
-
-        task = PipelineTask(
-            pipeline,
-            params=PipelineParams(
-                allow_interruptions=True,
-                audio_in_sample_rate=8000,  # Input is 8k
-                audio_out_sample_rate=8000,  # Output is 8k
-            ),
-        )
+        # For local testing, disable interruptions to prevent the bot from hearing itself
+        # and interrupting. This is a simpler solution than trying to mute the mic.
+        task._params.allow_interruptions = False
 
         return pipeline, task
 
@@ -210,6 +105,8 @@ class LocalMicrophoneBot:
             print("\n" + "=" * 60)
             print("🎤 Ghost Brain Local Microphone Test")
             print("=" * 60)
+            print("\n⚠️  IMPORTANT: Use headphones to prevent echo!")
+            print("    Without headphones, the bot will hear its own voice.")
             print("\nInstructions:")
             print("  • Speak clearly into your microphone")
             print("  • Wait for the bot to finish speaking before responding")

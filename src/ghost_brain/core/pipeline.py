@@ -1,8 +1,8 @@
 """Core pipeline assembly logic."""
 
+import audioop
 import logging
 
-from pipecat.audio.resamplers.soxr_stream_resampler import SOXRStreamAudioResampler
 from pipecat.frames.frames import Frame, InputAudioRawFrame
 from pipecat.pipeline.pipeline import Pipeline
 from pipecat.pipeline.task import PipelineParams, PipelineTask
@@ -11,7 +11,6 @@ from pipecat.processors.frame_processor import FrameDirection, FrameProcessor
 from pipecat.transports.websocket.fastapi import FastAPIWebsocketTransport
 
 from ghost_brain.config import Settings
-from ghost_brain.core.debug import AudioLogger
 from ghost_brain.services.context import create_context_and_aggregators
 from ghost_brain.services.llm import create_llm
 from ghost_brain.services.stt import create_stt
@@ -27,20 +26,33 @@ class AudioResampler(FrameProcessor):
         super().__init__()
         self._input_rate = input_rate
         self._output_rate = output_rate
-        self._resampler = SOXRStreamAudioResampler()
+        self._state = None
+        logger.info(f"AudioResampler initialized: {input_rate} -> {output_rate}")
 
     async def process_frame(self, frame: Frame, direction: FrameDirection):
-        await super().process_frame(frame, direction)
+        # Handle StartFrame specially to ensure proper state tracking
+        if "StartFrame" in str(type(frame)):
+            # For StartFrame, we MUST call super() first to set self._started = True
+            await super().process_frame(frame, direction)
+            # Don't return - continue to check if it's audio or pass through
 
         if isinstance(frame, InputAudioRawFrame):
             if not frame.audio or len(frame.audio) == 0:
-                # Skip empty frames to avoid STT warnings
                 return
 
-            # Resample audio
-            resampled_audio = await self._resampler.resample(
-                frame.audio, self._input_rate, self._output_rate
-            )
+            # Resample audio using audioop (low latency)
+            try:
+                resampled_audio, self._state = audioop.ratecv(
+                    frame.audio,
+                    2,  # 16-bit
+                    1,  # mono
+                    self._input_rate,
+                    self._output_rate,
+                    self._state,
+                )
+            except Exception as e:
+                logger.error(f"Resampling error: {e}")
+                return
 
             if not resampled_audio or len(resampled_audio) == 0:
                 return
@@ -52,7 +64,10 @@ class AudioResampler(FrameProcessor):
             # Recalculate num_frames since length changed
             frame.num_frames = int(len(frame.audio) / (frame.num_channels * 2))
 
-        await self.push_frame(frame, direction)
+            await self.push_frame(frame, direction)
+        else:
+            # For non-audio frames, just push them through
+            await self.push_frame(frame, direction)
 
 
 def build_pipeline(
@@ -84,7 +99,6 @@ def build_pipeline(
     pipeline = Pipeline(
         [
             transport.input(),
-            AudioLogger("InputAudio"),
             resampler,  # Upsample 8k -> 16k
             stt,  # Expects 16k
             user_agg,  # VAD expects 16k

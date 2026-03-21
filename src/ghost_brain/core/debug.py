@@ -18,11 +18,14 @@ class AudioLogger(FrameProcessor):
         self._count = 0
 
     async def process_frame(self, frame: Frame, direction: FrameDirection):
-        logger.debug("[%s] Processing frame: %s", self._name, frame)
+        # Always log system frames to see if they are passing through
+        if not isinstance(frame, AudioRawFrame | TextFrame):
+            logger.debug("[%s] System frame: %s", self._name, frame)
+
         if isinstance(frame, AudioRawFrame):
             self._count += 1
             if self._count % self._log_every == 0:
-                logger.info(
+                logger.debug(
                     "[%s] Audio frame #%d: len=%d, rate=%d, channels=%d",
                     self._name,
                     self._count,
@@ -33,4 +36,4 @@ class AudioLogger(FrameProcessor):
         elif isinstance(frame, TextFrame):
             logger.info("[%s] Text frame: %s", self._name, frame.text)
 
-        await self.push_frame(frame, direction)
+        await super().process_frame(frame, direction)
