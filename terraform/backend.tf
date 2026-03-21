@@ -4,6 +4,6 @@
 # terraform {
 #   backend "gcs" {
 #     bucket = "YOUR_STATE_BUCKET"
-#     prefix = "ghostwriter/state"
+#     prefix = "ghost_brain/state"
 #   }
 # }

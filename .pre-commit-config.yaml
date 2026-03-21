@@ -1,4 +1,4 @@
-# Pre-commit hooks for Ghostwriter.
+# Pre-commit hooks for Ghost Brain.
 # Install: pre-commit install
 # Run manually: pre-commit run --all-files
 

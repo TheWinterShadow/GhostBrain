@@ -1,10 +1,10 @@
-"""Unit tests for ghostwriter.config."""
+"""Unit tests for ghost_brain.config."""
 
 import os
 
 import pytest
 
-from ghostwriter.config import Settings, get_settings
+from ghost_brain.config import Settings, get_settings
 
 
 def test_settings_loads_from_env(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -16,7 +16,7 @@ def test_settings_loads_from_env(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("TWILIO_ACCOUNT_SID", "env-sid")
     monkeypatch.setenv("TWILIO_AUTH_TOKEN", "env-token")
     # Clear cache so we get fresh load
-    import ghostwriter.config as m
+    import ghost_brain.config as m
     m._settings = None
     s = get_settings()
     assert s.groq_api_key == "env-groq"
@@ -29,7 +29,7 @@ def test_settings_loads_from_env(monkeypatch: pytest.MonkeyPatch) -> None:
 
 def test_settings_defaults() -> None:
     """Settings should have empty string defaults when env is unset."""
-    import ghostwriter.config as m
+    import ghost_brain.config as m
     m._settings = None
     # Ensure no env vars are set for these (or unset them)
     for key in ("GROQ_API_KEY", "DEEPGRAM_API_KEY", "OPENAI_API_KEY",
@@ -42,7 +42,7 @@ def test_settings_defaults() -> None:
 
 def test_get_settings_caches() -> None:
     """get_settings should return the same instance on subsequent calls."""
-    import ghostwriter.config as m
+    import ghost_brain.config as m
     m._settings = None
     a = get_settings()
     b = get_settings()

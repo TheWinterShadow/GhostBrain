@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 from typing import Any
 
 from google.cloud import storage
+from pipecat.processors.aggregators.llm_context import LLMContext
 
 
 def format_transcript_markdown(
@@ -37,6 +38,11 @@ ID: {sid}
     for msg in messages:
         role = msg.get("role", "unknown")
         content = msg.get("content", "")
+        if isinstance(content, list):
+            # Handle content list (e.g. multi-modal)
+            text_parts = [c.get("text", "") for c in content if c.get("type") == "text"]
+            content = " ".join(text_parts)
+
         if role == "user":
             body_lines.append(f"**User:** {content}\n")
         elif role == "assistant":
@@ -45,6 +51,27 @@ ID: {sid}
             body_lines.append(f"**{role}:** {content}\n")
 
     return frontmatter + "\n".join(body_lines)
+
+
+def format_transcript(context: LLMContext) -> str:
+    """Format transcript from LLMContext."""
+    messages = []
+    # context.messages returns a list of LLMContextMessage (which are dicts or objects)
+    for msg in context.messages:
+        if isinstance(msg, dict):
+            messages.append(msg)
+        elif hasattr(msg, "message"):
+            # Handle LLMSpecificMessage wrapper
+            if isinstance(msg.message, dict):
+                messages.append(msg.message)
+            else:
+                # Try to extract dict from object if it's a Pydantic model or similar
+                try:
+                    messages.append(msg.message.model_dump())
+                except AttributeError:
+                    pass
+
+    return format_transcript_markdown(messages)
 
 
 def upload_transcript_to_gcs(

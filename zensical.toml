@@ -1,8 +1,8 @@
-# Zensical configuration for Ghostwriter docs.
+# Zensical configuration for Ghost Brain docs.
 
 [project]
-site_name = "Ghostwriter"
-site_url = "https://github.com/ghostwriter/ghostwriter"
+site_name = "Ghost Brain"
+site_url = "https://github.com/ghost_brain/ghost_brain"
 site_description = "Voice-interviewer bot documentation"
 docs_dir = "docs"
 site_dir = "site"

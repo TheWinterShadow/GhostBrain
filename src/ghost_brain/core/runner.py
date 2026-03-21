@@ -9,8 +9,8 @@ from pipecat.pipeline.task import PipelineTask
 from pipecat.processors.aggregators.llm_context import LLMContext
 from pipecat.transports.websocket.fastapi import FastAPIWebsocketTransport
 
-from ghostwriter.config import Settings
-from ghostwriter.transcript import format_transcript_markdown, upload_transcript_to_gcs
+from ghost_brain.config import Settings
+from ghost_brain.utils.transcript import format_transcript_markdown, upload_transcript_to_gcs
 
 logger = logging.getLogger(__name__)
 
@@ -48,7 +48,9 @@ def register_handlers(
                     markdown,
                     blob_path,
                 )
-                logger.info("Uploaded transcript to gs://%s/%s", settings.gcp_bucket_name, blob_path)
+                logger.info(
+                    "Uploaded transcript to gs://%s/%s", settings.gcp_bucket_name, blob_path
+                )
         except Exception as e:
             logger.exception("Failed to upload transcript: %s", e)
         await task.cancel()

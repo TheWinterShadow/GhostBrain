@@ -3,12 +3,12 @@ requires = ["hatchling>=1.26"]
 build-backend = "hatchling.build"
 
 [project]
-name = "ghostwriter"
+name = "ghost_brain"
 description = "Voice-interviewer bot using Pipecat, Twilio, Deepgram, Groq, and OpenAI TTS."
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = "==3.12.*"
 license = "MIT"
-authors = [{ name = "Ghostwriter" }]
+authors = [{ name = "Ghost Brain" }]
 dynamic = ["version"]
 dependencies = [
   "pipecat-ai[daily,deepgram,openai,silero,groq]",
@@ -16,6 +16,7 @@ dependencies = [
   "uvicorn[standard]",
   "google-cloud-storage",
   "pydantic-settings",
+  "pyaudio",
 ]
 
 [project.optional-dependencies]
@@ -31,17 +32,29 @@ dev = [
 ]
 
 [project.urls]
-Documentation = "https://github.com/ghostwriter/ghostwriter#readme"
-Repository = "https://github.com/ghostwriter/ghostwriter"
+Documentation = "https://github.com/ghost_brain/ghost_brain#readme"
+Repository = "https://github.com/ghost_brain/ghost_brain"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/ghostwriter"]
+packages = ["src/ghost_brain"]
 
 [tool.hatch.version]
-path = "src/ghostwriter/__about__.py"
+path = "src/ghost_brain/__about__.py"
+
+[tool.hatch.envs.default]
+python = "3.12"
 
 [tool.hatch.envs.default.scripts]
 test = "pytest"
+
+[tool.hatch.envs.dev]
+python = "3.12"
+features = ["dev"]
+
+[tool.hatch.envs.dev.scripts]
+test = "pytest"
+lint = "ruff check src tests"
+fmt = "ruff format src tests"
 
 [tool.ruff]
 target-version = "py312"
@@ -63,7 +76,7 @@ addopts = "-v --tb=short"
 filterwarnings = ["ignore::DeprecationWarning"]
 
 [tool.coverage.run]
-source = ["src/ghostwriter"]
+source = ["src/ghost_brain"]
 omit = ["*/__about__.py", "*/tests/*"]
 branch = true
 

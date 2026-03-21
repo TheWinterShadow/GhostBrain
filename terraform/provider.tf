@@ -1,4 +1,4 @@
-# Provider configuration for Ghostwriter infrastructure.
+# Provider configuration for Ghost Brain infrastructure.
 
 provider "google" {
   project = var.project_id

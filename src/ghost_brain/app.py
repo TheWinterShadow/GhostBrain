@@ -1,19 +1,19 @@
-"""FastAPI app and WebSocket endpoint for the Ghostwriter voice bot."""
+"""FastAPI app and WebSocket endpoint for the Ghost Brain voice bot."""
 
 import logging
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 
-from ghostwriter.__about__ import __version__
-from ghostwriter.config import get_settings
-from ghostwriter.pipeline import build_pipeline
-from ghostwriter.runner import register_handlers, run_pipeline
-from ghostwriter.transport import create_twilio_serializer, create_transport
+from ghost_brain.__about__ import __version__
+from ghost_brain.config import get_settings
+from ghost_brain.core.pipeline import build_pipeline
+from ghost_brain.core.runner import register_handlers, run_pipeline
+from ghost_brain.transport.twilio import create_transport, create_twilio_serializer
 
 logger = logging.getLogger(__name__)
 
 app = FastAPI(
-    title="Ghostwriter",
+    title="Ghost Brain",
     description="Voice-interviewer bot via Twilio WebSocket and Pipecat.",
     version=__version__,
 )

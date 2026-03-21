@@ -33,7 +33,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ secrets.GCP_REGISTRY_REGION || 'us-central1' }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/ghostwriter/ghostwriter-bot
+          images: ${{ secrets.GCP_REGISTRY_REGION || 'us-central1' }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/ghost_brain/ghost_brain-bot
           tags: |
             type=sha,prefix=
             type=raw,value=latest
@@ -51,7 +51,10 @@ jobs:
     needs: build-and-push
     runs-on: ubuntu-latest
     env:
-      IMAGE_URI: ${{ secrets.GCP_REGISTRY_REGION || 'us-central1' }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/ghostwriter/ghostwriter-bot:latest
+      IMAGE_URI: ${{ secrets.GCP_REGISTRY_REGION || 'us-central1' }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/ghost_brain/ghost_brain-bot:latest
+      # Terraform Cloud Credentials
+      TFC_WORKLOAD_IDENTITY_AUDIENCE: ${{ vars.TFC_WORKLOAD_IDENTITY_AUDIENCE }} # If using Dynamic
+      TFC_AWS_RUN_ROLE_ARN: ${{ vars.TFC_AWS_RUN_ROLE_ARN }} # Not used here but standard for dynamic
     steps:
       - uses: actions/checkout@v4
 
@@ -64,11 +67,16 @@ jobs:
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: "1.5.0"
+          # No cli_config_credentials_token needed for Service Principal environment variables
 
       - name: Terraform init
         working-directory: terraform
-        run: terraform init -backend=false
+        run: terraform init
         env:
+          # TFC Service Principal Credentials
+          TFC_CLIENT_ID: ${{ secrets.TFC_CLIENT_ID }}
+          TFC_CLIENT_SECRET: ${{ secrets.TFC_CLIENT_SECRET }}
+          # Vars
           TF_VAR_project_id: ${{ secrets.GCP_PROJECT_ID }}
           TF_VAR_cloud_run_image: ${{ env.IMAGE_URI }}
 
@@ -76,5 +84,14 @@ jobs:
         working-directory: terraform
         run: terraform apply -auto-approve -input=false
         env:
+          # TFC Service Principal Credentials
+          TFC_CLIENT_ID: ${{ secrets.TFC_CLIENT_ID }}
+          TFC_CLIENT_SECRET: ${{ secrets.TFC_CLIENT_SECRET }}
+          # App Secrets
           TF_VAR_project_id: ${{ secrets.GCP_PROJECT_ID }}
           TF_VAR_cloud_run_image: ${{ env.IMAGE_URI }}
+          TF_VAR_groq_api_key: ${{ secrets.GROQ_API_KEY }}
+          TF_VAR_deepgram_api_key: ${{ secrets.DEEPGRAM_API_KEY }}
+          TF_VAR_openai_api_key: ${{ secrets.OPENAI_API_KEY }}
+          TF_VAR_twilio_account_sid: ${{ secrets.TWILIO_ACCOUNT_SID }}
+          TF_VAR_twilio_auth_token: ${{ secrets.TWILIO_AUTH_TOKEN }}

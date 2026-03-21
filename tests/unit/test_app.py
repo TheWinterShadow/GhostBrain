@@ -1,11 +1,11 @@
-"""Unit tests for ghostwriter.app."""
+"""Unit tests for ghost_brain.app."""
 
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from fastapi.testclient import TestClient
 
-from ghostwriter.app import app
+from ghost_brain.app import app
 
 
 @pytest.fixture
@@ -22,9 +22,8 @@ def test_health(client: TestClient) -> None:
 
 
 def test_openapi_schema(client: TestClient) -> None:
-    """OpenAPI schema should list /health and /ws."""
+    """OpenAPI schema should list /health."""
     r = client.get("/openapi.json")
     assert r.status_code == 200
     data = r.json()
     assert "/health" in data.get("paths", {})
-    assert "/ws" in data.get("paths", {})

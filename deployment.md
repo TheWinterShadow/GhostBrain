@@ -1,6 +1,6 @@
-# Ghostwriter deployment guide
+# Ghost Brain deployment guide
 
-Steps to get the Ghostwriter voice-interviewer bot running on Google Cloud Run with Twilio.
+Steps to get the Ghost Brain voice-interviewer bot running on Google Cloud Run with Twilio.
 
 ---
 
@@ -9,9 +9,9 @@ Steps to get the Ghostwriter voice-interviewer bot running on Google Cloud Run w
 - **GCP project** with billing enabled.
 - **gcloud CLI** installed and logged in: `gcloud auth login` and `gcloud config set project YOUR_PROJECT_ID`.
 - **Terraform** 1.5+ installed locally (for first-time infra or manual apply).
-- **GitHub** repo with the Ghostwriter code (for CI/CD).
+- **GitHub** repo with the Ghost Brain code (for CI/CD).
 - **Accounts and keys:**
-  - [Groq](https://console.groq.com/) — API key for `llama-3.1-70b-versatile`.
+  - [Groq](https://console.groq.com/) — API key for `llama-3.3-70b-versatile`.
   - [Deepgram](https://console.deepgram.com/) — API key for STT (nova-2).
   - [OpenAI](https://platform.openai.com/) — API key for TTS (tts-1, alloy).
   - [Twilio](https://console.twilio.com/) — Account SID and Auth Token (and a Voice-capable phone number).
@@ -31,15 +31,15 @@ export REGION="us-central1"
 gcloud services enable artifactregistry.googleapis.com --project="$PROJECT_ID"
 
 # Create the repository (Docker format)
-gcloud artifacts repositories create ghostwriter \
+gcloud artifacts repositories create ghost_brain \
   --repository-format=docker \
   --location="$REGION" \
   --project="$PROJECT_ID" \
-  --description="Ghostwriter bot images"
+  --description="Ghost Brain bot images"
 ```
 
 The workflow expects the image at:  
-`$REGION-docker.pkg.dev/$PROJECT_ID/ghostwriter/ghostwriter-bot:latest`.
+`$REGION-docker.pkg.dev/$PROJECT_ID/ghost_brain/ghost_brain-bot:latest`.
 
 ---
 
@@ -55,7 +55,7 @@ terraform init
 
 # Plan with a placeholder image (replace with your project ID)
 export TF_VAR_project_id="$PROJECT_ID"
-export TF_VAR_cloud_run_image="$REGION-docker.pkg.dev/$PROJECT_ID/ghostwriter/ghostwriter-bot:latest"
+export TF_VAR_cloud_run_image="$REGION-docker.pkg.dev/$PROJECT_ID/ghost_brain/ghost_brain-bot:latest"
 
 terraform plan -out=tfplan
 
@@ -73,19 +73,19 @@ Terraform creates secrets with placeholder versions. Add real values (no quotes,
 
 ```bash
 # Groq API key
-echo -n "YOUR_GROQ_API_KEY" | gcloud secrets versions add ghostwriter-groq-api-key --data-file=- --project="$PROJECT_ID"
+echo -n "YOUR_GROQ_API_KEY" | gcloud secrets versions add ghost_brain-groq-api-key --data-file=- --project="$PROJECT_ID"
 
 # Deepgram API key
-echo -n "YOUR_DEEPGRAM_API_KEY" | gcloud secrets versions add ghostwriter-deepgram-api-key --data-file=- --project="$PROJECT_ID"
+echo -n "YOUR_DEEPGRAM_API_KEY" | gcloud secrets versions add ghost_brain-deepgram-api-key --data-file=- --project="$PROJECT_ID"
 
 # OpenAI API key
-echo -n "YOUR_OPENAI_API_KEY" | gcloud secrets versions add ghostwriter-openai-api-key --data-file=- --project="$PROJECT_ID"
+echo -n "YOUR_OPENAI_API_KEY" | gcloud secrets versions add ghost_brain-openai-api-key --data-file=- --project="$PROJECT_ID"
 
 # Twilio Account SID
-echo -n "YOUR_TWILIO_ACCOUNT_SID" | gcloud secrets versions add ghostwriter-twilio-account-sid --data-file=- --project="$PROJECT_ID"
+echo -n "YOUR_TWILIO_ACCOUNT_SID" | gcloud secrets versions add ghost_brain-twilio-account-sid --data-file=- --project="$PROJECT_ID"
 
 # Twilio Auth Token
-echo -n "YOUR_TWILIO_AUTH_TOKEN" | gcloud secrets versions add ghostwriter-twilio-auth-token --data-file=- --project="$PROJECT_ID"
+echo -n "YOUR_TWILIO_AUTH_TOKEN" | gcloud secrets versions add ghost_brain-twilio-auth-token --data-file=- --project="$PROJECT_ID"
 ```
 
 Cloud Run will use the **latest** version of each secret. To rotate a key, add a new version; the next revision will pick it up.
@@ -109,9 +109,9 @@ For the **Deploy** workflow to build the image and run Terraform:
 
 - Create a GCP service account (e.g. `github-actions-deploy`).
 - Grant it at least:
-  - **Artifact Registry:** Artifact Registry Writer (or equivalent) on the `ghostwriter` repo.
-  - **Cloud Run:** Cloud Run Admin, Service Account User (for the Ghostwriter SA).
-  - **Terraform resources:** Secret Manager Admin (or enough to reference secrets), Storage Admin (if using GCS backend), and any roles needed to create/update the resources in `terraform/modules/ghostwriter` (e.g. Service Account Admin, Storage Admin for the bucket).
+  - **Artifact Registry:** Artifact Registry Writer (or equivalent) on the `ghost_brain` repo.
+  - **Cloud Run:** Cloud Run Admin, Service Account User (for the Ghost Brain SA).
+  - **Terraform resources:** Secret Manager Admin (or enough to reference secrets), Storage Admin (if using GCS backend), and any roles needed to create/update the resources in `terraform/modules/ghost_brain` (e.g. Service Account Admin, Storage Admin for the bucket).
 - Create a JSON key and paste the entire contents into the `GCP_SA_KEY` secret.
 
 ---
@@ -121,10 +121,10 @@ For the **Deploy** workflow to build the image and run Terraform:
 1. **Get your Cloud Run URL**  
    From Terraform output:  
    `terraform -chdir=terraform output -raw cloud_run_url`  
-   Example: `https://ghostwriter-bot-xxxxx-uc.a.run.app`.
+   Example: `https://ghost_brain-bot-xxxxx-uc.a.run.app`.
 
 2. **Create a TwiML Bin** (Twilio Console → Explore → TwiML Bins):
-   - Name: e.g. `Ghostwriter WebSocket`.
+   - Name: e.g. `Ghost Brain WebSocket`.
    - Body (replace the URL with your Cloud Run URL, **wss** for secure WebSocket):
 
    ```xml
@@ -158,7 +158,7 @@ To keep state in GCS and optionally run Terraform from CI with a shared state:
    terraform {
      backend "gcs" {
        bucket = "YOUR_PROJECT_ID-terraform-state"
-       prefix = "ghostwriter/state"
+       prefix = "ghost_brain/state"
      }
    }
    ```
@@ -175,16 +175,16 @@ To keep state in GCS and optionally run Terraform from CI with a shared state:
 
 - **Manual deploy (image only):** Build and push the image, then either run Terraform apply with the new image tag or use `gcloud run deploy`:
   ```bash
-  docker build -t $REGION-docker.pkg.dev/$PROJECT_ID/ghostwriter/ghostwriter-bot:latest .
-  docker push $REGION-docker.pkg.dev/$PROJECT_ID/ghostwriter/ghostwriter-bot:latest
-  gcloud run services update ghostwriter-bot --image=$REGION-docker.pkg.dev/$PROJECT_ID/ghostwriter/ghostwriter-bot:latest --region=$REGION --project=$PROJECT_ID
+  docker build -t $REGION-docker.pkg.dev/$PROJECT_ID/ghost_brain/ghost_brain-bot:latest .
+  docker push $REGION-docker.pkg.dev/$PROJECT_ID/ghost_brain/ghost_brain-bot:latest
+  gcloud run services update ghost_brain-bot --image=$REGION-docker.pkg.dev/$PROJECT_ID/ghost_brain/ghost_brain-bot:latest --region=$REGION --project=$PROJECT_ID
   ```
 
 **Verification:**
 
 1. **Health:** Open `https://YOUR_CLOUD_RUN_URL/health` in a browser; expect `{"status":"ok"}`.
-2. **Call:** Dial your Twilio number; the bot should answer and speak (Ghostwriter greeting). Hang up; the transcript should appear in the GCS bucket under `transcripts/<call_sid>.md`.
-3. **Logs:** `gcloud run services logs read ghostwriter-bot --region=$REGION --project=$PROJECT_ID`.
+2. **Call:** Dial your Twilio number; the bot should answer and speak (Ghost Brain greeting). Hang up; the transcript should appear in the GCS bucket under `transcripts/<call_sid>.md`.
+3. **Logs:** `gcloud run services logs read ghost_brain-bot --region=$REGION --project=$PROJECT_ID`.
 
 ---
 
@@ -203,7 +203,7 @@ To keep state in GCS and optionally run Terraform from CI with a shared state:
 ## 10. Summary checklist
 
 - [ ] GCP project and gcloud CLI configured
-- [ ] Artifact Registry repo `ghostwriter` created in the chosen region
+- [ ] Artifact Registry repo `ghost_brain` created in the chosen region
 - [ ] Terraform applied once (bucket, SA, secrets, Cloud Run) with correct `project_id` and `cloud_run_image`
 - [ ] All five Secret Manager secrets updated with real values (Groq, Deepgram, OpenAI, Twilio SID, Twilio token)
 - [ ] GitHub repo secrets set: `GCP_SA_KEY`, `GCP_PROJECT_ID` (and optionally `GCP_REGISTRY_REGION`)

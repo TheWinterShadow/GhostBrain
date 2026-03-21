@@ -1,10 +1,10 @@
-resource "google_cloud_run_v2_service" "ghostwriter_bot" {
-  name     = var.ghostwriter_service_name
+resource "google_cloud_run_v2_service" "ghost_brain_bot" {
+  name     = var.ghost_brain_service_name
   location = var.region
   project  = var.project_id
 
   template {
-    service_account = google_service_account.ghostwriter_bot.email
+    service_account = google_service_account.ghost_brain_bot.email
 
     scaling {
       min_instance_count = 0
@@ -99,8 +99,8 @@ resource "google_cloud_run_v2_service" "ghostwriter_bot" {
 
 # Allow unauthenticated invocations so Twilio can reach the WebSocket endpoint.
 resource "google_cloud_run_v2_service_iam_member" "public_invoke" {
-  location = google_cloud_run_v2_service.ghostwriter_bot.location
-  name     = google_cloud_run_v2_service.ghostwriter_bot.name
+  location = google_cloud_run_v2_service.ghost_brain_bot.location
+  name     = google_cloud_run_v2_service.ghost_brain_bot.name
   role     = "roles/run.invoker"
   member   = "allUsers"
 }

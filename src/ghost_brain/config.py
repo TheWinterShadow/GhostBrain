@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     In production these are typically injected via Secret Manager (Cloud Run).
     """
 
-    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+    model_config = SettingsConfigDict(env_file=".env", env_prefix="GHOST_BRAIN_", extra="ignore")
 
     groq_api_key: str = ""
     deepgram_api_key: str = ""

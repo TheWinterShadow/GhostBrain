@@ -1,11 +1,11 @@
-"""Pytest fixtures and configuration for Ghostwriter tests."""
+"""Pytest fixtures and configuration for Ghost Brain tests."""
 
 import os
 from unittest.mock import MagicMock
 
 import pytest
 
-from ghostwriter.config import Settings
+from ghost_brain.config import Settings
 
 
 @pytest.fixture
@@ -34,7 +34,7 @@ def sample_messages() -> list[dict]:
 @pytest.fixture(autouse=True)
 def reset_settings_cache() -> None:
     """Reset the global settings cache so tests get fresh Settings."""
-    import ghostwriter.config as config_module
+    import ghost_brain.config as config_module
     config_module._settings = None
     yield
     config_module._settings = None

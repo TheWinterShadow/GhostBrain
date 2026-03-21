@@ -9,7 +9,7 @@ from pipecat.transports.websocket.fastapi import (
     FastAPIWebsocketTransport,
 )
 
-from ghostwriter.config import Settings
+from ghost_brain.config import Settings
 
 
 def create_twilio_serializer(

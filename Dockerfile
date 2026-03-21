@@ -1,4 +1,4 @@
-# Ghostwriter voice bot — production image for Cloud Run.
+# Ghost Brain voice bot — production image for Cloud Run.
 # Python 3.12, system deps for audio (portaudio), install package via pip.
 
 FROM python:3.12-slim
@@ -20,4 +20,4 @@ RUN pip install --no-cache-dir .
 # USER nobody
 
 EXPOSE 8080
-CMD ["uvicorn", "ghostwriter.app:app", "--host", "0.0.0.0", "--port", "8080"]
+CMD ["uvicorn", "ghost_brain.app:app", "--host", "0.0.0.0", "--port", "8080"]

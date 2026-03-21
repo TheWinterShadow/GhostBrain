@@ -1,4 +1,4 @@
-# Enable required GCP APIs for Ghostwriter.
+# Enable required GCP APIs for Ghost Brain.
 
 resource "google_project_service" "secretmanager" {
   project            = var.project_id

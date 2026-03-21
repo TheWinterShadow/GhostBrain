@@ -19,18 +19,27 @@ jobs:
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: "1.5.0"
+          # No token needed for SP
 
       - name: Terraform init
         working-directory: terraform
-        run: terraform init -backend=false
+        run: terraform init
         env:
-          # Use dummy vars for plan on PR; real values in deploy
-          TF_VAR_project_id: ${{ secrets.TF_VAR_project_id || 'dummy-project' }}
-          TF_VAR_cloud_run_image: ${{ secrets.TF_VAR_cloud_run_image || 'gcr.io/dummy/ghostwriter:latest' }}
+          TFC_CLIENT_ID: ${{ secrets.TFC_CLIENT_ID }}
+          TFC_CLIENT_SECRET: ${{ secrets.TFC_CLIENT_SECRET }}
+          TF_VAR_project_id: ${{ secrets.GCP_PROJECT_ID }}
+          TF_VAR_cloud_run_image: ${{ secrets.TF_VAR_cloud_run_image || 'gcr.io/dummy/ghost_brain:latest' }}
 
       - name: Terraform plan
         working-directory: terraform
         run: terraform plan -no-color -input=false
         env:
-          TF_VAR_project_id: ${{ secrets.TF_VAR_project_id || 'dummy-project' }}
-          TF_VAR_cloud_run_image: ${{ secrets.TF_VAR_cloud_run_image || 'gcr.io/dummy/ghostwriter:latest' }}
+          TFC_CLIENT_ID: ${{ secrets.TFC_CLIENT_ID }}
+          TFC_CLIENT_SECRET: ${{ secrets.TFC_CLIENT_SECRET }}
+          TF_VAR_project_id: ${{ secrets.GCP_PROJECT_ID }}
+          TF_VAR_cloud_run_image: ${{ secrets.TF_VAR_cloud_run_image || 'gcr.io/dummy/ghost_brain:latest' }}
+          TF_VAR_groq_api_key: ${{ secrets.GROQ_API_KEY || 'dummy' }}
+          TF_VAR_deepgram_api_key: ${{ secrets.DEEPGRAM_API_KEY || 'dummy' }}
+          TF_VAR_openai_api_key: ${{ secrets.OPENAI_API_KEY || 'dummy' }}
+          TF_VAR_twilio_account_sid: ${{ secrets.TWILIO_ACCOUNT_SID || 'dummy' }}
+          TF_VAR_twilio_auth_token: ${{ secrets.TWILIO_AUTH_TOKEN || 'dummy' }}

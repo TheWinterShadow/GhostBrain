@@ -35,7 +35,7 @@ jobs:
         run: hatch run pytest tests -v --tb=short
 
       - name: Coverage (optional)
-        run: hatch run pytest tests -v --cov=src/ghostwriter --cov-report=term-missing || true
+        run: hatch run pytest tests -v --cov=src/ghost_brain --cov-report=term-missing || true
 
   terraform:
     runs-on: ubuntu-latest

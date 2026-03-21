@@ -1,11 +1,11 @@
-"""Unit tests for ghostwriter.transcript."""
+"""Unit tests for ghost_brain.transcript."""
 
 from datetime import datetime, timezone
 from unittest.mock import MagicMock, patch
 
 import pytest
 
-from ghostwriter.transcript import format_transcript_markdown, upload_transcript_to_gcs
+from ghost_brain.utils.transcript import format_transcript_markdown, upload_transcript_to_gcs
 
 
 def test_format_transcript_markdown_basic(sample_messages: list[dict]) -> None:
@@ -43,7 +43,7 @@ def test_format_transcript_markdown_unknown_role() -> None:
     assert "You are helpful." in out
 
 
-@patch("ghostwriter.transcript.storage.Client")
+@patch("ghost_brain.utils.transcript.storage.Client")
 def test_upload_transcript_to_gcs(
     mock_client_class: object,
     mock_storage_bucket: MagicMock,

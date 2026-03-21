@@ -11,7 +11,7 @@
 
 ## Components
 
-- **Application:** `src/ghostwriter/` — FastAPI WebSocket at `/ws`, Pipecat pipeline (Deepgram STT, Groq LLM, OpenAI TTS), transcript upload to GCS on disconnect.
+- **Application:** `src/ghost_brain/` — FastAPI WebSocket at `/ws`, Pipecat pipeline (Deepgram STT, Groq LLM, OpenAI TTS), transcript upload to GCS on disconnect.
 - **Infrastructure:** `terraform/` — GCS bucket, Secret Manager secrets, Cloud Run service.
 - **CI/CD:** `.github/workflows/` — Lint, test, Terraform plan/apply, Docker build and deploy.
 
@@ -19,5 +19,5 @@
 
 ```bash
 hatch run test
-hatch run uvicorn ghostwriter.app:app --host 0.0.0.0 --port 8080
+hatch run uvicorn ghost_brain.app:app --host 0.0.0.0 --port 8080
 ```

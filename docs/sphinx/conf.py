@@ -1,13 +1,13 @@
-# Sphinx configuration for Ghostwriter API docs.
+# Sphinx configuration for Ghost Brain API docs.
 
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent / "src"))
 
-project = "Ghostwriter"
-copyright = "Ghostwriter"
-author = "Ghostwriter"
+project = "Ghost Brain"
+copyright = "Ghost Brain"
+author = "Ghost Brain"
 release = "0.1.0"
 
 extensions = [

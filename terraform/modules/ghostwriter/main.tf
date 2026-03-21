@@ -1,4 +1,4 @@
-# GCS bucket and service account for Ghostwriter.
+# GCS bucket and service account for Ghost Brain.
 
 # Random suffix for globally unique bucket name.
 resource "random_id" "bucket_suffix" {
@@ -18,15 +18,15 @@ resource "google_storage_bucket" "transcript_bucket" {
 }
 
 # Service account for the Cloud Run service.
-resource "google_service_account" "ghostwriter_bot" {
-  account_id   = "ghostwriter-bot"
-  display_name = "Ghostwriter Voice Bot"
+resource "google_service_account" "ghost_brain_bot" {
+  account_id   = "ghost_brain-bot"
+  display_name = "Ghost Brain Voice Bot"
   project      = var.project_id
 }
 
 # Grant the service account permission to create objects in the bucket.
-resource "google_storage_bucket_iam_member" "ghostwriter_bucket_creator" {
+resource "google_storage_bucket_iam_member" "ghost_brain_bucket_creator" {
   bucket = google_storage_bucket.transcript_bucket.name
   role   = "roles/storage.objectCreator"
-  member = "serviceAccount:${google_service_account.ghostwriter_bot.email}"
+  member = "serviceAccount:${google_service_account.ghost_brain_bot.email}"
 }
