@@ -30,6 +30,20 @@ def test_settings_loads_from_env(monkeypatch: pytest.MonkeyPatch) -> None:
     assert s.twilio_auth_token == "env-token"
 
 
+def test_settings_personality(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Settings should allow overriding personality configuration."""
+    monkeypatch.setenv("GHOST_BRAIN_AI_NAME", "Jarvis")
+    monkeypatch.setenv("GHOST_BRAIN_AI_PERSONALITY", "You are sarcastic.")
+
+    import ghost_brain.config as m
+
+    m._settings = None
+    s = get_settings()
+
+    assert s.ai_name == "Jarvis"
+    assert s.ai_personality == "You are sarcastic."
+
+
 def test_settings_defaults() -> None:
     """Settings should have empty string defaults when env is unset."""
     import ghost_brain.config as m

@@ -20,6 +20,15 @@ class Settings(BaseSettings):
     twilio_account_sid: str = ""
     twilio_auth_token: str = ""
 
+    # Personality Configuration
+    ai_name: str = "Ghost Brain"
+    ai_personality: str = (
+        "You are a friendly voice interviewer. "
+        "Keep responses concise and natural for spoken conversation. "
+        "Ask one question at a time and listen before continuing."
+    )
+    ai_greeting: str = "Hello, this is {name}. I'm here to interview you."
+
 
 _settings: Settings | None = None
 
