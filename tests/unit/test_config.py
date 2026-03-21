@@ -34,6 +34,7 @@ def test_settings_personality(monkeypatch: pytest.MonkeyPatch) -> None:
     """Settings should allow overriding personality configuration."""
     monkeypatch.setenv("GHOST_BRAIN_AI_NAME", "Jarvis")
     monkeypatch.setenv("GHOST_BRAIN_AI_PERSONALITY", "You are sarcastic.")
+    monkeypatch.setenv("GHOST_BRAIN_AI_GREETING", "Greetings, human.")
 
     import ghost_brain.config as m
 
@@ -42,6 +43,7 @@ def test_settings_personality(monkeypatch: pytest.MonkeyPatch) -> None:
 
     assert s.ai_name == "Jarvis"
     assert s.ai_personality == "You are sarcastic."
+    assert s.ai_greeting == "Greetings, human."
 
 
 def test_settings_defaults() -> None:
