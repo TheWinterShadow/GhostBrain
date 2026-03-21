@@ -29,7 +29,13 @@ async def health() -> dict[str, str]:
 async def incoming_call(request: Request) -> Response:
     """Handle incoming call and return TwiML."""
     host = request.headers.get("host", "localhost")
-    protocol = "wss" if request.url.scheme == "https" else "ws"
+
+    # Force WSS if running on Cloud Run (or behind any HTTPS proxy)
+    # X-Forwarded-Proto is set by Cloud Run load balancer
+    forwarded_proto = request.headers.get("x-forwarded-proto", "")
+    is_secure = request.url.scheme == "https" or forwarded_proto == "https"
+    protocol = "wss" if is_secure else "ws"
+
     ws_url = f"{protocol}://{host}/ws"
 
     xml = f"""<?xml version="1.0" encoding="UTF-8"?>
