@@ -19,7 +19,7 @@ variable "cloud_run_image" {
 variable "ghost_brain_service_name" {
   description = "Name of the Cloud Run service."
   type        = string
-  default     = "ghost_brain-bot"
+  default     = "ghost-brain-bot"
 }
 
 variable "bucket_name_prefix" {
