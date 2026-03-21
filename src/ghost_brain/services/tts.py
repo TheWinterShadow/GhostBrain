@@ -1,24 +1,22 @@
 """TTS Service factory."""
 
-from pipecat.services.openai.tts import OpenAITTSService
+from pipecat.services.deepgram.tts import DeepgramTTSService
 
 from ghost_brain.config import Settings
 
 
-def create_tts(settings: Settings) -> OpenAITTSService:
+def create_tts(settings: Settings) -> DeepgramTTSService:
     """
-    Create OpenAI TTS service (tts-1, voice alloy).
+    Create Deepgram TTS service (aura-2-orpheus-en).
 
     Args:
-        settings: Application settings containing OpenAI API key.
+        settings: Application settings containing Deepgram API key.
 
     Returns:
-        Configured OpenAITTSService instance.
+        Configured DeepgramTTSService instance.
     """
-    return OpenAITTSService(
-        api_key=settings.openai_api_key,
-        settings=OpenAITTSService.Settings(
-            voice="alloy",
-            model="tts-1",
-        ),
+    return DeepgramTTSService(
+        api_key=settings.deepgram_api_key,
+        voice="aura-2-orpheus-en",
+        sample_rate=8000,
     )
