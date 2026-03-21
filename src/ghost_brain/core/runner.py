@@ -31,6 +31,7 @@ def register_handlers(
 
     @transport.event_handler("on_client_connected")
     async def on_client_connected(_transport: Any, _client: Any) -> None:
+        logger.info("Client connected! Queueing LLMRunFrame.")
         await task.queue_frames([LLMRunFrame()])
 
     @transport.event_handler("on_client_disconnected")
