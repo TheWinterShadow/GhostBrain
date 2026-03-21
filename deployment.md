@@ -38,7 +38,7 @@ gcloud artifacts repositories create ghost-brain \
   --description="Ghost Brain bot images"
 ```
 
-The workflow expects the image at:  
+The workflow expects the image at:
 `$REGION-docker.pkg.dev/$PROJECT_ID/ghost-brain/ghost_brain-bot:latest`.
 
 ---
@@ -118,9 +118,9 @@ For the **Deploy** workflow to build the image and run Terraform:
 
 ## 6. Twilio: phone number and WebSocket URL
 
-1. **Get your Cloud Run URL**  
-   From Terraform output:  
-   `terraform -chdir=terraform output -raw cloud_run_url`  
+1. **Get your Cloud Run URL**
+   From Terraform output:
+   `terraform -chdir=terraform output -raw cloud_run_url`
    Example: `https://ghost_brain-bot-xxxxx-uc.a.run.app`.
 
 2. **Create a TwiML Bin** (Twilio Console → Explore → TwiML Bins):
@@ -136,7 +136,7 @@ For the **Deploy** workflow to build the image and run Terraform:
    </Response>
    ```
 
-3. **Assign the TwiML Bin to a phone number**  
+3. **Assign the TwiML Bin to a phone number**
    Phone Numbers → Manage → Active Numbers → select your number → under "Voice configuration", set "A call comes in" to **TwiML Bin** and choose the bin above. Save.
 
 Calls to that number will connect to your bot’s `/ws` endpoint.

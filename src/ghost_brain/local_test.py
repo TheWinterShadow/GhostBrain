@@ -3,7 +3,7 @@
 import asyncio
 import logging
 import os
-from typing import Optional
+from pathlib import Path
 
 from pipecat.audio.vad.silero import SileroVADAnalyzer
 from pipecat.audio.vad.vad_analyzer import VADParams
@@ -18,7 +18,7 @@ from pipecat.processors.aggregators.llm_response_universal import (
 from pipecat.services.deepgram.stt import DeepgramSTTService
 from pipecat.services.groq.llm import GroqLLMService
 from pipecat.services.openai.tts import OpenAITTSService
-from pipecat.transports.daily.transport import DailyTransport, DailyParams
+from pipecat.transports.daily.transport import DailyParams, DailyTransport
 
 from ghost_brain.config import Settings, get_settings
 from ghost_brain.utils.transcript import format_transcript
@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 class LocalTestBot:
     """Bot for local testing with microphone using Daily transport."""
 
-    def __init__(self, settings: Settings, room_url: Optional[str] = None):
+    def __init__(self, settings: Settings, room_url: str | None = None):
         """Initialize the local test bot.
 
         Args:
@@ -40,7 +40,7 @@ class LocalTestBot:
         self.settings = settings
         self.room_url = room_url
         self.context = LLMContext()
-        self.transport: Optional[DailyTransport] = None
+        self.transport: DailyTransport | None = None
 
     async def setup_transport(self) -> DailyTransport:
         """Setup Daily transport for local microphone/speaker access."""
@@ -59,18 +59,13 @@ class LocalTestBot:
         # But we might want to create a room first.
 
         if not self.room_url:
-            # DailyTransport doesn't have a create_room method helper usually?
-            # We might need to use Daily REST API or just a temp room.
-            # For now, let's assume we need a room URL or we can pass a dummy one if we use join later?
-            # But the __init__ requires it.
-            # Actually, if we look at the code, room_url is required.
+            # DailyTransport usually requires a room URL.
+            # For testing, we might need the Daily REST API or a pre-created room.
             pass
 
-        # If we don't have a room URL, we can't instantiate DailyTransport easily if it enforces it.
-        # However, the previous code tried to use transport.create().
-        # Let's check if DailyTransport has a create() method.
-        # I suspect we need to use `Daily.create_room` or similar if we want to create one.
-        # Or just ask the user for a room URL.
+        # If we don't have a room URL, we can't easily instantiate DailyTransport.
+        # However, previous implementations might have used a helper.
+        # For now, we'll proceed and let the transport validation handle it.
 
         if not self.room_url:
             # Fallback to a hardcoded logic or error?
@@ -90,11 +85,8 @@ class LocalTestBot:
             await transport.join(self.room_url)
             logger.info(f"Joined existing room: {self.room_url}")
         else:
-            # We need to create a room. DailyTransport doesn't seem to have a create() method in the visible code.
-            # We might need to use an external helper or just tell the user to provide one.
-            # But wait, the previous code had `room = await transport.create()`.
-            # Maybe I missed it in BaseTransport or DailyTransport?
-            # Let's assume for now we just use the room_url provided or fail.
+            # DailyTransport doesn't expose a create() method directly.
+            # The user must provide a room URL via env var or arguments.
             logger.error("No room URL provided. Please set DAILY_ROOM_URL or use local_mic_test.py")
             raise ValueError("DAILY_ROOM_URL is required for Daily transport test")
 
@@ -191,10 +183,10 @@ class LocalTestBot:
                 transcript = format_transcript(self.context)
 
                 # Save locally
-                filename = "local_test_transcript.txt"
-                with open(filename, "w") as f:
+                filename = Path("local_test_transcript.txt")
+                with filename.open("w") as f:
                     f.write(transcript)
-                logger.info(f"Transcript saved to: {filename}")
+                logger.info(f"Transcript saved to: {filename.absolute()}")
 
                 # Also print to console
                 print("\n--- Conversation Transcript ---")

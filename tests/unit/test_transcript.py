@@ -1,9 +1,7 @@
 """Unit tests for ghost_brain.transcript."""
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from unittest.mock import MagicMock, patch
-
-import pytest
 
 from ghost_brain.utils.transcript import format_transcript_markdown, upload_transcript_to_gcs
 
@@ -24,13 +22,13 @@ def test_format_transcript_markdown_defaults_session_id(sample_messages: list[di
     assert "ID:" in out
     assert "ID: unknown" not in out
     # Should look like a UUID (contains dashes)
-    line = [l for l in out.splitlines() if l.startswith("ID:")][0]
+    line = next(line for line in out.splitlines() if line.startswith("ID:"))
     assert len(line) > 10
 
 
 def test_format_transcript_markdown_custom_date(sample_messages: list[dict]) -> None:
     """Custom date should appear in frontmatter."""
-    dt = datetime(2025, 3, 1, 12, 0, 0, tzinfo=timezone.utc)
+    dt = datetime(2025, 3, 1, 12, 0, 0, tzinfo=UTC)
     out = format_transcript_markdown(sample_messages, session_id="x", date=dt)
     assert "2025-03-01T12:00:00Z" in out
 

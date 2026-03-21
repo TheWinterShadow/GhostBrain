@@ -14,7 +14,6 @@ repos:
     rev: v1.91.0
     hooks:
       - id: terraform_fmt
-        args: [--recursive]
       - id: terraform_validate
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -24,5 +23,14 @@ repos:
       - id: end-of-file-fixer
       - id: check-yaml
       - id: check-added-large-files
-        args: [--maxkb=1000]
+        args: ['--maxkb=1000']
       - id: check-merge-conflict
+
+  - repo: local
+    hooks:
+      - id: pytest
+        name: pytest
+        entry: hatch run test
+        language: system
+        types: [python]
+        pass_filenames: false  # Run full test suite to ensure no regressions

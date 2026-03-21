@@ -1,7 +1,8 @@
 """Transcript formatting and GCS upload for call recordings."""
 
+import contextlib
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 from google.cloud import storage
@@ -25,7 +26,7 @@ def format_transcript_markdown(
         Markdown string with frontmatter and message body.
     """
     sid = session_id or str(uuid.uuid4())
-    dt = date or datetime.now(timezone.utc)
+    dt = date or datetime.now(UTC)
     date_str = dt.strftime("%Y-%m-%dT%H:%M:%SZ")
 
     frontmatter = f"""---
@@ -66,10 +67,8 @@ def format_transcript(context: LLMContext) -> str:
                 messages.append(msg.message)
             else:
                 # Try to extract dict from object if it's a Pydantic model or similar
-                try:
+                with contextlib.suppress(AttributeError):
                     messages.append(msg.message.model_dump())
-                except AttributeError:
-                    pass
 
     return format_transcript_markdown(messages)
 

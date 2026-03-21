@@ -168,7 +168,7 @@ from pydantic_settings import BaseSettings
 class Settings(BaseSettings):
     api_key: str
     timeout: int = 30
-    
+
     model_config = SettingsConfigDict(env_prefix="GHOST_BRAIN_")
 ```
 

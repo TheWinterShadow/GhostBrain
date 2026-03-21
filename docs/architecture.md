@@ -55,12 +55,12 @@ The system accepts audio input from multiple sources:
   - 8kHz sample rate (telephony standard)
   - µ-law audio encoding
   - Real-time bidirectional streaming
-  
+
 - **Local Microphone**: Development/testing via PyAudio
   - 16kHz sample rate (higher quality)
   - Direct PCM audio capture
   - No telephony overhead
-  
+
 - **Daily WebRTC**: Browser-based testing
   - 16kHz sample rate
   - WebRTC peer-to-peer connection
@@ -96,7 +96,7 @@ Each component processes audio/text frames in real-time:
 - Filters background noise
 
 ### 5. **Speech-to-Text (STT)**
-**Service**: Deepgram  
+**Service**: Deepgram
 **Model**: `nova-2`
 - Industry-leading accuracy for conversational speech
 - Real-time streaming transcription
@@ -105,7 +105,7 @@ Each component processes audio/text frames in real-time:
 - Speaker diarization capable
 
 ### 6. **Large Language Model (LLM)**
-**Service**: Groq  
+**Service**: Groq
 **Model**: `llama-3.3-70b-versatile`
 - 70 billion parameter model
 - Optimized for conversational AI
@@ -114,8 +114,8 @@ Each component processes audio/text frames in real-time:
 - System prompt customization for interviewer personality
 
 ### 7. **Text-to-Speech (TTS)**
-**Service**: OpenAI  
-**Model**: `tts-1`  
+**Service**: OpenAI
+**Model**: `tts-1`
 **Voice**: `alloy`
 - Natural-sounding synthesized speech
 - Low latency streaming
@@ -125,7 +125,7 @@ Each component processes audio/text frames in real-time:
 ### 8. **Context Management**
 LLM Context tracks conversation history:
 - User utterances
-- Assistant responses  
+- Assistant responses
 - Maintains conversation flow
 - Enables follow-up questions
 - Powers transcript generation

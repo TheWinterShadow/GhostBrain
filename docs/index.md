@@ -47,7 +47,7 @@ pip install hatch pyaudio
 
 # Set up API keys in .env
 echo "GHOST_BRAIN_DEEPGRAM_API_KEY=your_key" >> .env
-echo "GHOST_BRAIN_GROQ_API_KEY=your_key" >> .env  
+echo "GHOST_BRAIN_GROQ_API_KEY=your_key" >> .env
 echo "GHOST_BRAIN_OPENAI_API_KEY=your_key" >> .env
 
 # Run local test

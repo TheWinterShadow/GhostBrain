@@ -22,7 +22,7 @@ You'll need API keys from these services (all offer free tiers):
    - Get API key from: Dashboard → API Keys
    - Free tier: $200 credit
 
-2. **Groq** - For LLM inference  
+2. **Groq** - For LLM inference
    - Sign up at: https://console.groq.com/
    - Get API key from: API Keys section
    - Free tier: Generous rate limits
@@ -146,7 +146,7 @@ No additional installation needed - Daily is included in the Pipecat dependencie
    ```bash
    export DAILY_API_TOKEN=your_daily_token
    ```
-   
+
    Without a token, you can still join existing rooms.
 
 2. **Run the test script:**

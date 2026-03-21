@@ -16,7 +16,7 @@ import sys
 from pathlib import Path
 
 try:
-    import pyaudio
+    import pyaudio  # noqa: F401
 except ImportError:
     print("PyAudio not installed. Please run: pip install pyaudio")
     print("On macOS, you may need: brew install portaudio")

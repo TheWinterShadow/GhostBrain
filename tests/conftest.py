@@ -1,6 +1,5 @@
 """Pytest fixtures and configuration for Ghost Brain tests."""
 
-import os
 from unittest.mock import MagicMock
 
 import pytest
@@ -35,6 +34,7 @@ def sample_messages() -> list[dict]:
 def reset_settings_cache() -> None:
     """Reset the global settings cache so tests get fresh Settings."""
     import ghost_brain.config as config_module
+
     config_module._settings = None
     yield
     config_module._settings = None

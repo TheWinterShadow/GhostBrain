@@ -61,6 +61,8 @@ fmt = "ruff format src tests"
 target-version = "py312"
 line-length = 100
 src = ["src", "tests"]
+
+[tool.ruff.lint]
 select = ["I", "E", "F", "B", "C4", "SIM", "UP", "ARG", "PTH"]
 ignore = ["ARG001", "ARG002", "S101"]
 
