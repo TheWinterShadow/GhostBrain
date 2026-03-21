@@ -1,12 +1,13 @@
 # Ghost Brain voice bot — production image for Cloud Run.
 # Python 3.12, system deps for audio (portaudio), install package via pip.
 
-FROM python:3.12-slim
+FROM python:3.12-slim-bookworm
 
 # System dependencies for audio (Pipecat / Silero VAD, etc.)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     portaudio19-dev \
     gcc \
+    pkg-config \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
