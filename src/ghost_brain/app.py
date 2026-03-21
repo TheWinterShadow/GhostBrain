@@ -2,7 +2,7 @@
 
 import logging
 
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, Request, Response, WebSocket, WebSocketDisconnect
 
 from ghost_brain.__about__ import __version__
 from ghost_brain.config import get_settings
@@ -23,6 +23,23 @@ app = FastAPI(
 async def health() -> dict[str, str]:
     """Health check for load balancers and Cloud Run."""
     return {"status": "ok"}
+
+
+@app.post("/incoming-call")
+async def incoming_call(request: Request) -> Response:
+    """Handle incoming call and return TwiML."""
+    host = request.headers.get("host", "localhost")
+    protocol = "wss" if request.url.scheme == "https" else "ws"
+    ws_url = f"{protocol}://{host}/ws"
+
+    xml = f"""<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+    <Connect>
+        <Stream url="{ws_url}" />
+    </Connect>
+</Response>
+"""
+    return Response(content=xml, media_type="application/xml")
 
 
 @app.websocket("/ws")

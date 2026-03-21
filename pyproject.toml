@@ -16,7 +16,6 @@ dependencies = [
   "uvicorn[standard]",
   "google-cloud-storage",
   "pydantic-settings",
-  "pyaudio",
 ]
 
 [project.optional-dependencies]
@@ -29,6 +28,7 @@ dev = [
   "sphinx>=7.0",
   "sphinx-rtd-theme>=2.0",
   "zensical",
+  "pyaudio",  # Only for local dev
 ]
 
 [project.urls]

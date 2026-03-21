@@ -10,7 +10,8 @@ output "bucket_name" {
   value       = module.ghost_brain.bucket_name
 }
 
-output "service_account_email" {
-  description = "Email of the Cloud Run service account."
-  value       = module.ghost_brain.service_account_email
+
+output "twilio_application_sid" {
+  description = "The SID of the Twilio Application created for Ghost Brain. Assign this to your phone number."
+  value       = module.ghost_brain.twilio_application_sid
 }

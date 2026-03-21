@@ -25,3 +25,16 @@ def test_openapi_schema(client: TestClient) -> None:
     assert r.status_code == 200
     data = r.json()
     assert "/health" in data.get("paths", {})
+
+
+def test_incoming_call(client: TestClient) -> None:
+    """Incoming call should return TwiML with WebSocket stream."""
+    # Test HTTPS scheme logic
+    r = client.post("https://test-server.com/incoming-call", headers={"host": "test-server.com"})
+    assert r.status_code == 200
+    assert r.headers["content-type"] == "application/xml"
+
+    xml = r.text
+    assert "<Response>" in xml
+    assert "<Connect>" in xml
+    assert '<Stream url="wss://test-server.com/ws" />' in xml

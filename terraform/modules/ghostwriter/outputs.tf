@@ -10,7 +10,9 @@ output "bucket_name" {
   value       = google_storage_bucket.transcript_bucket.name
 }
 
-output "service_account_email" {
-  description = "Email of the Cloud Run service account."
-  value       = google_service_account.ghost_brain_bot.email
+
+
+output "twilio_application_sid" {
+  description = "The SID of the Twilio Application created for Ghost Brain."
+  value       = twilio_api_accounts_applications.ghost_brain_bot.sid
 }

@@ -6,3 +6,8 @@ provider "google" {
 }
 
 provider "random" {}
+
+provider "twilio" {
+  username = var.twilio_account_sid
+  password = var.twilio_auth_token
+}
