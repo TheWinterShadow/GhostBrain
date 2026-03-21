@@ -31,7 +31,7 @@ export REGION="us-central1"
 gcloud services enable artifactregistry.googleapis.com --project="$PROJECT_ID"
 
 # Create the repository (Docker format)
-gcloud artifacts repositories create ghost_brain \
+gcloud artifacts repositories create ghost-brain \
   --repository-format=docker \
   --location="$REGION" \
   --project="$PROJECT_ID" \
@@ -39,7 +39,7 @@ gcloud artifacts repositories create ghost_brain \
 ```
 
 The workflow expects the image at:  
-`$REGION-docker.pkg.dev/$PROJECT_ID/ghost_brain/ghost_brain-bot:latest`.
+`$REGION-docker.pkg.dev/$PROJECT_ID/ghost-brain/ghost_brain-bot:latest`.
 
 ---
 
@@ -55,7 +55,7 @@ terraform init
 
 # Plan with a placeholder image (replace with your project ID)
 export TF_VAR_project_id="$PROJECT_ID"
-export TF_VAR_cloud_run_image="$REGION-docker.pkg.dev/$PROJECT_ID/ghost_brain/ghost_brain-bot:latest"
+export TF_VAR_cloud_run_image="$REGION-docker.pkg.dev/$PROJECT_ID/ghost-brain/ghost_brain-bot:latest"
 
 terraform plan -out=tfplan
 

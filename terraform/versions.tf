@@ -4,7 +4,7 @@ terraform {
   required_version = ">= 1.5.0"
 
   cloud {
-    organization = "YOUR_ORG_NAME"
+    organization = "TheWinterShadow"
 
     workspaces {
       name = "ghost-brain"

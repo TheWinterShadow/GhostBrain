@@ -92,7 +92,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ secrets.GCP_REGISTRY_REGION || 'us-central1' }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/ghost_brain/ghost_brain-bot
+          images: ${{ secrets.GCP_REGISTRY_REGION || 'us-central1' }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/ghost-brain/ghost_brain-bot
           tags: |
             type=sha,prefix=
             type=raw,value=latest
@@ -110,7 +110,7 @@ jobs:
     needs: build-and-push
     runs-on: ubuntu-latest
     env:
-      IMAGE_URI: ${{ secrets.GCP_REGISTRY_REGION || 'us-central1' }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/ghost_brain/ghost_brain-bot:latest
+      IMAGE_URI: ${{ secrets.GCP_REGISTRY_REGION || 'us-central1' }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/ghost-brain/ghost_brain-bot:latest
     steps:
       - uses: actions/checkout@v4
 

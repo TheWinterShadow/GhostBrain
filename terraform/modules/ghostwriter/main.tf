@@ -19,7 +19,7 @@ resource "google_storage_bucket" "transcript_bucket" {
 
 # Service account for the Cloud Run service.
 resource "google_service_account" "ghost_brain_bot" {
-  account_id   = "ghost_brain-bot"
+  account_id   = "ghostbrain-bot"
   display_name = "Ghost Brain Voice Bot"
   project      = var.project_id
 }

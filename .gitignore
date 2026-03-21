@@ -2,3 +2,6 @@ dist/
 .env
 __pycache__/
 .vscode/settings.json
+terraform/.terraform/providers/registry.terraform.io/hashicorp/google/5.45.2/darwin_arm64/terraform-provider-google_v5.45.2_x5
+terraform/.terraform/
+.terraform.lock.hcl
