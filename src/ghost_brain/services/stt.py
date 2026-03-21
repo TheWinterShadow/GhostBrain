@@ -19,5 +19,10 @@ def create_stt(settings: Settings, sample_rate: int = 16000) -> DeepgramSTTServi
     return DeepgramSTTService(
         api_key=settings.deepgram_api_key,
         sample_rate=sample_rate,
-        settings=DeepgramSTTService.Settings(model="nova-2"),
+        settings=DeepgramSTTService.Settings(
+            model="nova-2",
+            # Opt out of Model Improvement Partnership (MIP) program
+            # to prevent data from being used for training
+            extra={"mip_opt_out": True},
+        ),
     )

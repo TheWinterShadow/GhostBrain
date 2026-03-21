@@ -18,5 +18,10 @@ def create_tts(settings: Settings) -> DeepgramTTSService:
     return DeepgramTTSService(
         api_key=settings.deepgram_api_key,
         sample_rate=8000,
-        settings=DeepgramTTSService.Settings(voice="aura-2-orpheus-en"),
+        settings=DeepgramTTSService.Settings(
+            voice="aura-2-orpheus-en",
+            # Opt out of Model Improvement Partnership (MIP) program
+            # to prevent data from being used for training
+            extra={"mip_opt_out": True},
+        ),
     )
