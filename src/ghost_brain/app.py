@@ -33,7 +33,19 @@ async def incoming_call(request: Request) -> Response:
     # Force WSS if running on Cloud Run (or behind any HTTPS proxy)
     # X-Forwarded-Proto is set by Cloud Run load balancer
     forwarded_proto = request.headers.get("x-forwarded-proto", "")
-    is_secure = request.url.scheme == "https" or forwarded_proto == "https"
+    logger.info(
+        "Incoming call headers: host=%s, proto=%s, scheme=%s",
+        host,
+        forwarded_proto,
+        request.url.scheme,
+    )
+
+    is_secure = (
+        request.url.scheme == "https"
+        or "https" in forwarded_proto
+        or host.endswith(".run.app")
+        or host.endswith(".ngrok-free.app")
+    )
     protocol = "wss" if is_secure else "ws"
 
     ws_url = f"{protocol}://{host}/ws"
