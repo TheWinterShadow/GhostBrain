@@ -25,6 +25,10 @@ jobs:
       - name: Install Hatch
         run: pip install hatch
 
+      # Install dependencies first (including ruff) to avoid environment issues
+      - name: Install dependencies
+        run: hatch env create dev
+
       - name: Ruff Check & Format
         run: |
            hatch run ruff check src tests
@@ -48,11 +52,17 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Install System Dependencies (PortAudio)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y portaudio19-dev
+
       - name: Install Hatch
         run: pip install hatch
 
+      # Use 'dev' environment consistently
       - name: Install dependencies
-        run: hatch env create --force && hatch run pip install -e ".[dev]"
+        run: hatch env create dev
 
       - name: Pytest
         run: hatch run pytest tests -v --tb=short
