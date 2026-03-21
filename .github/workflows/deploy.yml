@@ -1,6 +1,6 @@
-# Build image and deploy to Cloud Run on push to main.
-# Requires GCP credentials and Terraform/Cloud Run permissions.
-# Secrets: GCP_SA_KEY, GCP_PROJECT_ID; optional GCP_REGISTRY_REGION (default us-central1).
+# Build, Test, Lint, and Deploy to Cloud Run on push to main.
+# Linting and Testing run in parallel.
+# Build and Deploy run in series after checks pass.
 
 name: Deploy
 
@@ -12,7 +12,66 @@ env:
   REGION: us-central1
 
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Hatch
+        run: pip install hatch
+
+      - name: Ruff Check & Format
+        run: |
+           hatch run ruff check src tests
+           hatch run ruff format --check src tests
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.5.0"
+
+      - name: Terraform Fmt
+        run: terraform fmt -check -recursive terraform/
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Hatch
+        run: pip install hatch
+
+      - name: Install dependencies
+        run: hatch env create --force && hatch run pip install -e ".[dev]"
+
+      - name: Pytest
+        run: hatch run pytest tests -v --tb=short
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.5.0"
+
+      - name: Terraform Init (Backend-less)
+        working-directory: terraform
+        run: terraform init -backend=false
+
+      - name: Terraform Validate
+        working-directory: terraform
+        run: terraform validate
+
   build-and-push:
+    needs: [lint, test]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -52,9 +111,6 @@ jobs:
     runs-on: ubuntu-latest
     env:
       IMAGE_URI: ${{ secrets.GCP_REGISTRY_REGION || 'us-central1' }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/ghost_brain/ghost_brain-bot:latest
-      # Terraform Cloud Credentials
-      TFC_WORKLOAD_IDENTITY_AUDIENCE: ${{ vars.TFC_WORKLOAD_IDENTITY_AUDIENCE }} # If using Dynamic
-      TFC_AWS_RUN_ROLE_ARN: ${{ vars.TFC_AWS_RUN_ROLE_ARN }} # Not used here but standard for dynamic
     steps:
       - uses: actions/checkout@v4
 
@@ -67,27 +123,37 @@ jobs:
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: "1.5.0"
-          # No cli_config_credentials_token needed for Service Principal environment variables
+          # No token needed for SP env vars
 
-      - name: Terraform init
+      - name: Terraform Init
         working-directory: terraform
         run: terraform init
         env:
-          # TFC Service Principal Credentials
           TFC_CLIENT_ID: ${{ secrets.TFC_CLIENT_ID }}
           TFC_CLIENT_SECRET: ${{ secrets.TFC_CLIENT_SECRET }}
-          # Vars
           TF_VAR_project_id: ${{ secrets.GCP_PROJECT_ID }}
           TF_VAR_cloud_run_image: ${{ env.IMAGE_URI }}
 
-      - name: Terraform apply
+      - name: Terraform Plan
+        working-directory: terraform
+        run: terraform plan -input=false
+        env:
+          TFC_CLIENT_ID: ${{ secrets.TFC_CLIENT_ID }}
+          TFC_CLIENT_SECRET: ${{ secrets.TFC_CLIENT_SECRET }}
+          TF_VAR_project_id: ${{ secrets.GCP_PROJECT_ID }}
+          TF_VAR_cloud_run_image: ${{ env.IMAGE_URI }}
+          TF_VAR_groq_api_key: ${{ secrets.GROQ_API_KEY }}
+          TF_VAR_deepgram_api_key: ${{ secrets.DEEPGRAM_API_KEY }}
+          TF_VAR_openai_api_key: ${{ secrets.OPENAI_API_KEY }}
+          TF_VAR_twilio_account_sid: ${{ secrets.TWILIO_ACCOUNT_SID }}
+          TF_VAR_twilio_auth_token: ${{ secrets.TWILIO_AUTH_TOKEN }}
+
+      - name: Terraform Apply
         working-directory: terraform
         run: terraform apply -auto-approve -input=false
         env:
-          # TFC Service Principal Credentials
           TFC_CLIENT_ID: ${{ secrets.TFC_CLIENT_ID }}
           TFC_CLIENT_SECRET: ${{ secrets.TFC_CLIENT_SECRET }}
-          # App Secrets
           TF_VAR_project_id: ${{ secrets.GCP_PROJECT_ID }}
           TF_VAR_cloud_run_image: ${{ env.IMAGE_URI }}
           TF_VAR_groq_api_key: ${{ secrets.GROQ_API_KEY }}

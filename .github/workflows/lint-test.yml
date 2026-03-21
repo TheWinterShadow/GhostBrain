@@ -1,26 +1,47 @@
-# Lint and test on PR and push to main.
+# Lint and test on PR (but not on push to main, as deploy.yml handles that).
 
 name: Lint and test
 
 on:
-  push:
-    branches: [main]
   pull_request:
     branches: [main]
 
 jobs:
-  python:
+  lint:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.12"]
     steps:
       - uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: "3.12"
+
+      - name: Install Hatch
+        run: pip install hatch
+
+      - name: Ruff Check & Format
+        run: |
+           hatch run ruff check src tests
+           hatch run ruff format --check src tests
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.5.0"
+
+      - name: Terraform Fmt
+        run: terraform fmt -check -recursive terraform/
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
 
       - name: Install Hatch
         run: pip install hatch
@@ -28,32 +49,18 @@ jobs:
       - name: Install dependencies
         run: hatch env create --force && hatch run pip install -e ".[dev]"
 
-      - name: Ruff
-        run: hatch run ruff check src tests && hatch run ruff format --check src tests
-
-      - name: pytest
+      - name: Pytest
         run: hatch run pytest tests -v --tb=short
-
-      - name: Coverage (optional)
-        run: hatch run pytest tests -v --cov=src/ghost_brain --cov-report=term-missing || true
-
-  terraform:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: "1.5.0"
 
-      - name: Terraform fmt
-        run: terraform fmt -check -recursive terraform/
-
-      - name: Terraform init
+      - name: Terraform Init (Backend-less)
         working-directory: terraform
         run: terraform init -backend=false
 
-      - name: Terraform validate
+      - name: Terraform Validate
         working-directory: terraform
         run: terraform validate
