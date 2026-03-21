@@ -17,6 +17,6 @@ def create_tts(settings: Settings) -> DeepgramTTSService:
     """
     return DeepgramTTSService(
         api_key=settings.deepgram_api_key,
-        voice="aura-2-orpheus-en",
         sample_rate=8000,
+        settings=DeepgramTTSService.Settings(voice="aura-2-orpheus-en"),
     )
