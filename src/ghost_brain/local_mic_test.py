@@ -22,9 +22,15 @@ except ImportError:
     print("On macOS, you may need: brew install portaudio")
     sys.exit(1)
 
+from pipecat.audio.resamplers.soxr_stream_resampler import SOXRStreamAudioResampler
 from pipecat.audio.vad.silero import SileroVADAnalyzer
 from pipecat.audio.vad.vad_analyzer import VADParams
-from pipecat.frames.frames import BotStartedSpeakingFrame, BotStoppedSpeakingFrame, Frame
+from pipecat.frames.frames import (
+    BotStartedSpeakingFrame,
+    BotStoppedSpeakingFrame,
+    Frame,
+    InputAudioRawFrame,
+)
 from pipecat.pipeline.base_task import PipelineTaskParams
 from pipecat.pipeline.pipeline import Pipeline
 from pipecat.pipeline.task import PipelineParams, PipelineTask
@@ -35,8 +41,8 @@ from pipecat.processors.aggregators.llm_response_universal import (
 )
 from pipecat.processors.frame_processor import FrameDirection, FrameProcessor
 from pipecat.services.deepgram.stt import DeepgramSTTService
+from pipecat.services.deepgram.tts import DeepgramTTSService
 from pipecat.services.groq.llm import GroqLLMService
-from pipecat.services.openai.tts import OpenAITTSService
 from pipecat.transports.local.audio import LocalAudioTransport, LocalAudioTransportParams
 
 from ghost_brain.config import Settings, get_settings
@@ -44,6 +50,41 @@ from ghost_brain.utils.transcript import format_transcript
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+
+class AudioResampler(FrameProcessor):
+    """Processor to resample audio frames."""
+
+    def __init__(self, input_rate: int, output_rate: int):
+        super().__init__()
+        self._input_rate = input_rate
+        self._output_rate = output_rate
+        self._resampler = SOXRStreamAudioResampler()
+
+    async def process_frame(self, frame: Frame, direction: FrameDirection):
+        await super().process_frame(frame, direction)
+
+        if isinstance(frame, InputAudioRawFrame):
+            if not frame.audio or len(frame.audio) == 0:
+                # Skip empty frames to avoid STT warnings
+                return
+
+            # Resample audio
+            resampled_audio = await self._resampler.resample(
+                frame.audio, self._input_rate, self._output_rate
+            )
+
+            if not resampled_audio or len(resampled_audio) == 0:
+                return
+
+            # Update frame with new audio and sample rate
+            frame.audio = resampled_audio
+            frame.sample_rate = self._output_rate
+
+            # Recalculate num_frames since length changed
+            frame.num_frames = int(len(frame.audio) / (frame.num_channels * 2))
+
+        await self.push_frame(frame, direction)
 
 
 class MuteInputMonitor(FrameProcessor):
@@ -72,10 +113,11 @@ class LocalMicrophoneBot:
     def __init__(self, settings: Settings):
         self.settings = settings
         self.context = LLMContext()
+        # Local transport usually needs 16k/24k, but we force 8k to match production
         self.transport = LocalAudioTransport(
             params=LocalAudioTransportParams(
-                audio_out_sample_rate=24000,
-                audio_in_sample_rate=16000,
+                audio_out_sample_rate=8000,
+                audio_in_sample_rate=8000,
                 audio_out_enabled=True,
                 audio_in_enabled=True,
                 audio_out_channels=1,
@@ -101,10 +143,14 @@ class LocalMicrophoneBot:
             user_params=user_params,
         )
 
+        # Resampler: 8k (Input) -> 16k (STT/VAD)
+        resampler_in = AudioResampler(input_rate=8000, output_rate=16000)
+
         # Create services
         stt = DeepgramSTTService(
             api_key=self.settings.deepgram_api_key,
-            model="nova-2",
+            sample_rate=16000,  # Use standard 16k for STT
+            settings=DeepgramSTTService.Settings(model="nova-2"),
         )
 
         llm = GroqLLMService(
@@ -120,12 +166,11 @@ class LocalMicrophoneBot:
             ),
         )
 
-        tts = OpenAITTSService(
-            api_key=self.settings.openai_api_key,
-            settings=OpenAITTSService.Settings(
-                voice="alloy",
-                model="tts-1",
-            ),
+        # TTS at 8k
+        tts = DeepgramTTSService(
+            api_key=self.settings.deepgram_api_key,
+            sample_rate=8000,
+            settings=DeepgramTTSService.Settings(voice="aura-2-orpheus-en"),
         )
 
         # Build pipeline
@@ -134,10 +179,11 @@ class LocalMicrophoneBot:
         pipeline = Pipeline(
             [
                 self.transport.input(),
-                stt,
+                resampler_in,  # Upsample input to 16k
+                stt,  # Expects 16k
                 user_aggregator,
                 llm,
-                tts,
+                tts,  # Output 8k
                 mute_monitor,
                 self.transport.output(),
                 assistant_aggregator,
@@ -148,8 +194,8 @@ class LocalMicrophoneBot:
             pipeline,
             params=PipelineParams(
                 allow_interruptions=True,
-                audio_in_sample_rate=16000,
-                audio_out_sample_rate=24000,
+                audio_in_sample_rate=8000,  # Input is 8k
+                audio_out_sample_rate=8000,  # Output is 8k
             ),
         )
 
@@ -203,7 +249,6 @@ async def main():
     required_vars = [
         ("GHOST_BRAIN_DEEPGRAM_API_KEY", "Deepgram API key for speech-to-text"),
         ("GHOST_BRAIN_GROQ_API_KEY", "Groq API key for LLM"),
-        ("GHOST_BRAIN_OPENAI_API_KEY", "OpenAI API key for text-to-speech"),
     ]
 
     missing = []
