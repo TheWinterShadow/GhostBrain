@@ -17,5 +17,6 @@ def create_stt(settings: Settings) -> DeepgramSTTService:
     """
     return DeepgramSTTService(
         api_key=settings.deepgram_api_key,
+        sample_rate=8000,
         settings=DeepgramSTTService.Settings(model="nova-2"),
     )

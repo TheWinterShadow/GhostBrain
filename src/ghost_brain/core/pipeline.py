@@ -6,6 +6,7 @@ from pipecat.processors.aggregators.llm_context import LLMContext
 from pipecat.transports.websocket.fastapi import FastAPIWebsocketTransport
 
 from ghost_brain.config import Settings
+from ghost_brain.core.debug import AudioLogger
 from ghost_brain.services.context import create_context_and_aggregators
 from ghost_brain.services.llm import create_llm
 from ghost_brain.services.stt import create_stt
@@ -36,6 +37,7 @@ def build_pipeline(
     pipeline = Pipeline(
         [
             transport.input(),
+            AudioLogger("InputAudio"),
             stt,
             user_agg,
             llm,
