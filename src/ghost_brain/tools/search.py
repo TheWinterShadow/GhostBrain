@@ -1,9 +1,10 @@
 """DuckDuckGo Search tool for the LLM."""
 
+import asyncio
 import logging
 from typing import Any
 
-from duckduckgo_search import AsyncDDGS
+from duckduckgo_search import DDGS
 
 logger = logging.getLogger(__name__)
 
@@ -20,8 +21,12 @@ async def perform_web_search(params: Any) -> None:
     logger.info(f"LLM Tool Call: Searching web for '{query}'")
 
     try:
-        # Use AsyncDDGS for non-blocking search
-        results = await AsyncDDGS().text(query, max_results=max_results)
+        # Run synchronous DDGS search in a background thread
+        def _search():
+            with DDGS() as ddgs:
+                return list(ddgs.text(query, max_results=max_results))
+
+        results = await asyncio.to_thread(_search)
 
         if not results:
             await params.result_callback(f"No results found for query: {query}")
