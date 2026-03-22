@@ -98,7 +98,7 @@ async def build_pipeline(
     from ghost_brain.tools.search import search_web
 
     logger.info("Initializing Native Web Search Tool...")
-    llm.register_function("search_web", search_web)
+    llm.register_direct_function(search_web)
     logger.info("Web Search Tool registered successfully!")
 
     pipeline = Pipeline(
