@@ -2,8 +2,10 @@
 
 import asyncio
 import logging
+import random
 
 from ddgs import DDGS
+from pipecat.frames.frames import TextFrame
 from pipecat.services.llm_service import FunctionCallParams
 
 logger = logging.getLogger(__name__)
@@ -18,6 +20,14 @@ async def search_web(params: FunctionCallParams, query: str):
     logger.info(f"LLM Tool Call: Searching web for '{query}'")
 
     try:
+        fillers = [
+            "Let me check that for you. ",
+            "One second, looking that up. ",
+            "Searching the web for that. ",
+            "Let me find that. ",
+        ]
+        await params.llm.push_frame(TextFrame(random.choice(fillers)))
+
         # Run synchronous DDGS search in a background thread
         def _search():
             with DDGS() as ddgs:
