@@ -7,6 +7,7 @@ from pathlib import Path
 
 from pipecat.audio.vad.silero import SileroVADAnalyzer
 from pipecat.audio.vad.vad_analyzer import VADParams
+from pipecat.frames.frames import LLMRunFrame
 from pipecat.pipeline.base_task import PipelineTaskParams
 from pipecat.pipeline.pipeline import Pipeline
 from pipecat.pipeline.task import PipelineParams, PipelineTask
@@ -171,6 +172,24 @@ class LocalTestBot:
 
             # Run the pipeline
             task_params = PipelineTaskParams(loop=asyncio.get_running_loop())
+
+            # Handle Daily participant connection to trigger bot start
+            if self.transport:
+
+                @self.transport.event_handler("on_participant_joined")
+                async def on_participant_joined(transport, participant):
+                    # When someone joins, queue the start frame
+                    logger.info(f"Participant joined: {participant['id']} - Queueing start frame")
+                    await task.queue_frames([LLMRunFrame()])
+
+            # Trigger manually in case participant already joined or we're running without one
+            async def trigger_start():
+                await asyncio.sleep(2)
+                logger.info("Queueing start frame...")
+                await task.queue_frames([LLMRunFrame()])
+
+            asyncio.create_task(trigger_start())
+
             await task.run(task_params)
 
         except KeyboardInterrupt:

@@ -29,6 +29,7 @@ from pipecat.frames.frames import (
     BotStartedSpeakingFrame,
     BotStoppedSpeakingFrame,
     Frame,
+    LLMRunFrame,
 )
 from pipecat.pipeline.base_task import PipelineTaskParams
 from pipecat.pipeline.pipeline import Pipeline
@@ -111,10 +112,19 @@ class LocalMicrophoneBot:
             print("  • Speak clearly into your microphone")
             print("  • Wait for the bot to finish speaking before responding")
             print("  • Press Ctrl+C to stop and save the transcript")
-            print("\nStarting... Say hello to begin!\n")
+            print("\nStarting...\n")
 
             # Run pipeline
             task_params = PipelineTaskParams(loop=asyncio.get_running_loop())
+
+            # Start a background task to trigger the bot to speak first
+            async def trigger_start():
+                await asyncio.sleep(2)  # Give pipeline time to initialize
+                print("Bot connecting...")
+                await task.queue_frames([LLMRunFrame()])
+
+            asyncio.create_task(trigger_start())
+
             await task.run(task_params)
 
         except KeyboardInterrupt:
