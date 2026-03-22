@@ -2,29 +2,26 @@
 
 import asyncio
 import logging
-from typing import Any
 
 from duckduckgo_search import DDGS
+from pipecat.services.llm_service import FunctionCallParams
 
 logger = logging.getLogger(__name__)
 
 
-async def perform_web_search(params: Any) -> None:
-    """Search the web for real-time information, facts, and documentation."""
-    query = params.arguments.get("query")
-    max_results = params.arguments.get("max_results", 3)
+async def search_web(params: FunctionCallParams, query: str):
+    """Search the web for real-time information, facts, and documentation.
 
-    if not query:
-        await params.result_callback("Error: No search query provided.")
-        return
-
+    Args:
+        query: The search query to look up on the web.
+    """
     logger.info(f"LLM Tool Call: Searching web for '{query}'")
 
     try:
         # Run synchronous DDGS search in a background thread
         def _search():
             with DDGS() as ddgs:
-                return list(ddgs.text(query, max_results=max_results))
+                return list(ddgs.text(query, max_results=3))
 
         results = await asyncio.to_thread(_search)
 

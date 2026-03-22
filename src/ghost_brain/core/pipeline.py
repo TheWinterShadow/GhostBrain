@@ -95,10 +95,10 @@ async def build_pipeline(
     resampler = AudioResampler(input_rate=sample_rate, output_rate=16000)
 
     # Attach native Pipecat function for DuckDuckGo web search
-    from ghost_brain.tools.search import perform_web_search
+    from ghost_brain.tools.search import search_web
 
     logger.info("Initializing Native Web Search Tool...")
-    llm.register_function("search_web", perform_web_search)
+    llm.register_function("search_web", search_web)
     logger.info("Web Search Tool registered successfully!")
 
     pipeline = Pipeline(
