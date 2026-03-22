@@ -29,6 +29,9 @@ class DebugFrameLogger(FrameProcessor):
         self.audio_frame_count = 0
 
     async def process_frame(self, frame: Frame, direction: FrameDirection):
+        # Allow the base class to handle internal state (like StartFrame)
+        await super().process_frame(frame, direction)
+
         self.frame_count += 1
 
         if isinstance(frame, InputAudioRawFrame):
