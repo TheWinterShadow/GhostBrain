@@ -13,6 +13,7 @@ dynamic = ["version"]
 dependencies = [
   "pipecat-ai[daily,deepgram,openai,silero,groq]",
   "fastapi",
+  "python-multipart",
   "uvicorn[standard]",
   "google-cloud-storage",
   "pydantic-settings",
