@@ -23,7 +23,7 @@ class Settings(BaseSettings):
     # Personality Configuration
     ai_name: str = "Orion"
     ai_personality: str = (
-        "You are Orion — Eli's trusted thinking partner "
+        f"You are {ai_name} — Eli's trusted thinking partner "
         "and friend. You help him work through ideas, "
         "projects, and life. You hold space for both technical "
         "depth and emotional honesty, and you move "
