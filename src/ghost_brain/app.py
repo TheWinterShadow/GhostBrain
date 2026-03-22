@@ -28,6 +28,10 @@ async def health() -> dict[str, str]:
 @app.post("/incoming-call")
 async def incoming_call(request: Request) -> Response:
     """Handle incoming call and return TwiML."""
+    form_data = await request.form()
+    caller_number = form_data.get("From", "Unknown")
+    logger.info("Incoming call received from: %s", caller_number)
+
     host = request.headers.get("host", "localhost")
 
     # Force WSS if running on Cloud Run (or behind any HTTPS proxy)
@@ -53,7 +57,9 @@ async def incoming_call(request: Request) -> Response:
     xml = f"""<?xml version="1.0" encoding="UTF-8"?>
 <Response>
     <Connect>
-        <Stream url="{ws_url}" />
+        <Stream url="{ws_url}">
+            <Parameter name="caller_id" value="{caller_number}" />
+        </Stream>
     </Connect>
 </Response>
 """
@@ -82,6 +88,10 @@ async def websocket_endpoint(websocket: WebSocket) -> None:
         logger.warning("Unsupported transport type: %s", transport_type)
         await websocket.close(code=4500)
         return
+
+    custom_params = call_data.get("custom_parameters", {})
+    caller_id = custom_params.get("caller_id", "Unknown")
+    logger.info("Call started! Caller ID: %s", caller_id)
 
     session_id = call_data.get("call_id", "") or "unknown"
     serializer = create_twilio_serializer(call_data, settings)

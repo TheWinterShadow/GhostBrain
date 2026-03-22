@@ -37,4 +37,6 @@ def test_incoming_call(client: TestClient) -> None:
     xml = r.text
     assert "<Response>" in xml
     assert "<Connect>" in xml
-    assert '<Stream url="wss://test-server.com/ws" />' in xml
+    assert '<Stream url="wss://test-server.com/ws">' in xml
+    assert '<Parameter name="caller_id" value="Unknown" />' in xml
+    assert "</Stream>" in xml
