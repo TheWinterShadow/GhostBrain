@@ -25,7 +25,7 @@ def create_llm(settings: Settings) -> GroqLLMService:
     return GroqLLMService(
         api_key=settings.groq_api_key,
         settings=GroqLLMService.Settings(
-            model="llama-3.3-70b-versatile",
+            model="llama-3.1-8b-instant",
             system_instruction=system_prompt,
         ),
     )
