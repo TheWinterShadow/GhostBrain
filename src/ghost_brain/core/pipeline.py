@@ -1,8 +1,8 @@
 """Core pipeline assembly logic."""
 
 import audioop
-import logging
 
+from loguru import logger
 from pipecat.frames.frames import Frame, InputAudioRawFrame
 from pipecat.pipeline.pipeline import Pipeline
 from pipecat.pipeline.task import PipelineParams, PipelineTask
@@ -15,8 +15,6 @@ from ghost_brain.services.context import create_context_and_aggregators
 from ghost_brain.services.llm import create_llm
 from ghost_brain.services.stt import create_stt
 from ghost_brain.services.tts import create_tts
-
-logger = logging.getLogger(__name__)
 
 
 class DebugFrameLogger(FrameProcessor):

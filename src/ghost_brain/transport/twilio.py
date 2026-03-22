@@ -51,7 +51,10 @@ def create_transport(
         Configured FastAPIWebsocketTransport.
     """
     params = FastAPIWebsocketParams(
+        audio_in_enabled=True,
+        audio_in_sample_rate=8000,
         audio_out_enabled=True,
+        audio_out_sample_rate=8000,
         add_wav_header=False,
         serializer=serializer,
     )
