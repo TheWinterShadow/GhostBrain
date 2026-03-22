@@ -2,6 +2,8 @@
 
 from typing import Any
 
+from pipecat.adapters.schemas.function_schema import FunctionSchema
+from pipecat.adapters.schemas.tools_schema import ToolsSchema
 from pipecat.audio.vad.silero import SileroVADAnalyzer
 from pipecat.audio.vad.vad_analyzer import VADParams
 from pipecat.processors.aggregators.llm_context import LLMContext
@@ -23,7 +25,23 @@ def create_context_and_aggregators(
     Returns:
         Tuple of (context, user_aggregator, assistant_aggregator).
     """
-    context = LLMContext()
+    search_tool = FunctionSchema(
+        name="search_web",
+        description="Search the web for real-time information, facts, and documentation.",
+        properties={
+            "query": {
+                "type": "string",
+                "description": "The search query to look up on the web.",
+            },
+            "max_results": {
+                "type": "integer",
+                "description": "Maximum number of results to return (default 3).",
+            },
+        },
+        required=["query"],
+    )
+
+    context = LLMContext(tools=ToolsSchema(standard_tools=[search_tool]))
     vad_analyzer = SileroVADAnalyzer(
         sample_rate=sample_rate,
         params=VADParams(stop_secs=0.2),

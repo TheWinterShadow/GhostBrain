@@ -17,6 +17,7 @@ dependencies = [
   "google-cloud-storage",
   "pydantic-settings",
   "soxr>=0.3.7",
+  "duckduckgo-search>=6.0",
 ]
 
 [project.optional-dependencies]

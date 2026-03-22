@@ -8,7 +8,7 @@ from pipecat.pipeline.pipeline import Pipeline
 from pipecat.pipeline.task import PipelineParams, PipelineTask
 from pipecat.processors.aggregators.llm_context import LLMContext
 from pipecat.processors.frame_processor import FrameDirection, FrameProcessor
-from pipecat.transports.websocket.fastapi import FastAPIWebsocketTransport
+from pipecat.transports.base_transport import BaseTransport
 
 from ghost_brain.config import Settings
 from ghost_brain.services.context import create_context_and_aggregators
@@ -67,8 +67,9 @@ class AudioResampler(FrameProcessor):
             await self.push_frame(frame, direction)
 
 
-def build_pipeline(
-    transport: FastAPIWebsocketTransport,
+# ...
+async def build_pipeline(
+    transport: BaseTransport,
     settings: Settings,
     sample_rate: int = 8000,
 ) -> tuple[Pipeline, PipelineTask, LLMContext]:
@@ -92,6 +93,13 @@ def build_pipeline(
 
     # If input is 8k, we need to upsample to 16k for STT/VAD
     resampler = AudioResampler(input_rate=sample_rate, output_rate=16000)
+
+    # Attach native Pipecat function for DuckDuckGo web search
+    from ghost_brain.tools.search import perform_web_search
+
+    logger.info("Initializing Native Web Search Tool...")
+    llm.register_function("search_web", perform_web_search)
+    logger.info("Web Search Tool registered successfully!")
 
     pipeline = Pipeline(
         [

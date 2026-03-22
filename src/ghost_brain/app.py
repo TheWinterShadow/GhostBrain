@@ -72,6 +72,7 @@ async def websocket_endpoint(websocket: WebSocket) -> None:
         from pipecat.runner.utils import parse_telephony_websocket
 
         transport_type, call_data = await parse_telephony_websocket(websocket)
+        logger.info("WebSocket connected: transport=%s, call_data=%s", transport_type, call_data)
     except Exception as e:
         logger.exception("Failed to parse telephony WebSocket: %s", e)
         await websocket.close(code=4500)
@@ -85,7 +86,7 @@ async def websocket_endpoint(websocket: WebSocket) -> None:
     session_id = call_data.get("call_id", "") or "unknown"
     serializer = create_twilio_serializer(call_data, settings)
     transport = create_transport(websocket, serializer)
-    _, task, context = build_pipeline(transport, settings, sample_rate=8000)
+    _, task, context = await build_pipeline(transport, settings, sample_rate=8000)
     register_handlers(transport, task, context, settings, session_id)
 
     try:

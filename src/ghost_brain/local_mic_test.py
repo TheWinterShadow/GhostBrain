@@ -82,11 +82,11 @@ class LocalMicrophoneBot:
             )
         )
 
-    def build_pipeline(self) -> tuple[Pipeline, PipelineTask]:
+    async def build_pipeline(self) -> tuple[Pipeline, PipelineTask]:
         """Build the voice pipeline using the production pipeline builder."""
 
         # Use the core build_pipeline function but pass our local transport
-        pipeline, task, context = build_pipeline(
+        pipeline, task, context = await build_pipeline(
             transport=self.transport, settings=self.settings, sample_rate=8000
         )
         self.context = context
@@ -101,7 +101,7 @@ class LocalMicrophoneBot:
         """Run the bot with local microphone."""
         try:
             # Build pipeline
-            pipeline, task = self.build_pipeline()
+            pipeline, task = await self.build_pipeline()
 
             print("\n" + "=" * 60)
             print("🎤 Ghost Brain Local Microphone Test")
