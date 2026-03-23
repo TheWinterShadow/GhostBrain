@@ -115,6 +115,7 @@ async def build_pipeline(
     )
 
     params = PipelineParams(
+        allow_interruptions=False,
         audio_in_sample_rate=sample_rate,  # 8000
         audio_out_sample_rate=sample_rate,  # 8000
     )
