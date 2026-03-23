@@ -89,7 +89,7 @@ async def websocket_endpoint(websocket: WebSocket) -> None:
         await websocket.close(code=4500)
         return
 
-    custom_params = call_data.get("custom_parameters", {})
+    custom_params = call_data.get("body", {})
     caller_id = custom_params.get("caller_id", "Unknown")
     logger.info("Call started! Caller ID: %s", caller_id)
 
