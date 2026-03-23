@@ -3,7 +3,7 @@
 import logging
 from typing import Any
 
-from pipecat.frames.frames import LLMRunFrame
+from pipecat.frames.frames import LLMMessagesAppendFrame, LLMRunFrame
 from pipecat.pipeline.runner import PipelineRunner
 from pipecat.pipeline.task import PipelineTask
 from pipecat.processors.aggregators.llm_context import LLMContext
@@ -31,8 +31,18 @@ def register_handlers(
 
     @transport.event_handler("on_client_connected")
     async def on_client_connected(_transport: Any, _client: Any) -> None:
-        logger.info("Client connected! Queueing LLMRunFrame.")
-        await task.queue_frames([LLMRunFrame()])
+        logger.info("Client connected! Queueing initial LLMRunFrame.")
+        msg = (
+            "The user has connected to the phone call. "
+            "Please begin the conversation by saying exactly your initial greeting, "
+            "and nothing else."
+        )
+        await task.queue_frames(
+            [
+                LLMMessagesAppendFrame([{"role": "system", "content": msg}]),
+                LLMRunFrame(),
+            ]
+        )
 
     @transport.event_handler("on_client_disconnected")
     async def on_client_disconnected(_transport: Any, _client: Any) -> None:

@@ -17,7 +17,7 @@ def create_llm(settings: Settings) -> GroqLLMService:
     """
     greeting = settings.ai_greeting.format(name=settings.ai_name)
     system_prompt = (
-        f"You are {settings.ai_name}. {settings.ai_personality} "
+        f"You are {settings.ai_name}. {settings.system_instructions} "
         "When greeting the user for the first time, introduce yourself "
         f"using exactly these words: '{greeting}'."
     )

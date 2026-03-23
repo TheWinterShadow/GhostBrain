@@ -165,6 +165,8 @@ jobs:
           TF_VAR_openai_api_key: ${{ secrets.OPENAI_API_KEY }}
           TF_VAR_twilio_account_sid: ${{ secrets.TWILIO_ACCOUNT_SID }}
           TF_VAR_twilio_auth_token: ${{ secrets.TWILIO_AUTH_TOKEN }}
+          TF_VAR_allowed_caller_id: ${{ secrets.ALLOWED_CALLER_ID }}
+          TF_VAR_system_instructions: ${{ secrets.SYSTEM_INSTRUCTIONS }}
 
       - name: Terraform Apply
         working-directory: terraform
@@ -178,3 +180,5 @@ jobs:
           TF_VAR_openai_api_key: ${{ secrets.OPENAI_API_KEY }}
           TF_VAR_twilio_account_sid: ${{ secrets.TWILIO_ACCOUNT_SID }}
           TF_VAR_twilio_auth_token: ${{ secrets.TWILIO_AUTH_TOKEN }}
+          TF_VAR_allowed_caller_id: ${{ secrets.ALLOWED_CALLER_ID }}
+          TF_VAR_system_instructions: ${{ secrets.SYSTEM_INSTRUCTIONS }}

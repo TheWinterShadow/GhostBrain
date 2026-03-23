@@ -24,6 +24,16 @@ resource "google_cloud_run_v2_service" "ghost_brain_bot" {
       }
 
       env {
+        name  = "GHOST_BRAIN_ALLOWED_CALLER_ID"
+        value = var.allowed_caller_id
+      }
+
+      env {
+        name  = "GHOST_BRAIN_SYSTEM_INSTRUCTIONS"
+        value = var.system_instructions
+      }
+
+      env {
         name = "GHOST_BRAIN_GROQ_API_KEY"
         value_source {
           secret_key_ref {

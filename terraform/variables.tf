@@ -58,3 +58,17 @@ variable "twilio_auth_token" {
   type        = string
   sensitive   = true
 }
+
+variable "allowed_caller_id" {
+  description = "Allowed caller ID to whitelist"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "system_instructions" {
+  description = "System instructions for the AI personality"
+  type        = string
+  sensitive   = true
+  default     = ""
+}

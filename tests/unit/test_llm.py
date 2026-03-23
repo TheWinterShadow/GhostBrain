@@ -11,7 +11,7 @@ def test_create_llm_system_prompt() -> None:
     settings = Settings(
         groq_api_key="test-key",
         ai_name="TestBot",
-        ai_personality="You are helpful.",
+        system_instructions="You are helpful.",
         ai_greeting="Hi, I am {name}.",
     )
 

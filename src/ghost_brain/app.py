@@ -93,6 +93,11 @@ async def websocket_endpoint(websocket: WebSocket) -> None:
     caller_id = custom_params.get("caller_id", "Unknown")
     logger.info("Call started! Caller ID: %s", caller_id)
 
+    if settings.allowed_caller_id and not caller_id.endswith(settings.allowed_caller_id):
+        logger.warning(f"Unauthorized caller ID: {caller_id}. Dropping call.")
+        await websocket.close(code=4003)
+        return
+
     session_id = call_data.get("call_id", "") or "unknown"
     serializer = create_twilio_serializer(call_data, settings)
     transport = create_transport(websocket, serializer)
