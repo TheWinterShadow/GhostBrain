@@ -22,7 +22,7 @@ jobs:
           # No token needed for SP
 
       - name: Terraform init
-        working-directory: terraform
+        working-directory: terraform/environments/prod
         run: terraform init
         env:
           TFC_CLIENT_ID: ${{ secrets.TFC_CLIENT_ID }}
@@ -31,7 +31,7 @@ jobs:
           TF_VAR_cloud_run_image: ${{ secrets.TF_VAR_cloud_run_image || 'gcr.io/dummy/ghost_brain:latest' }}
 
       - name: Terraform plan
-        working-directory: terraform
+        working-directory: terraform/environments/prod
         run: terraform plan -no-color -input=false
         env:
           TFC_CLIENT_ID: ${{ secrets.TFC_CLIENT_ID }}

@@ -79,11 +79,11 @@ jobs:
           terraform_version: "1.5.0"
 
       - name: Terraform Init (Backend-less)
-        working-directory: terraform
+        working-directory: terraform/environments/prod
         run: terraform init -backend=false
 
       - name: Terraform Validate
-        working-directory: terraform
+        working-directory: terraform/environments/prod
         run: terraform validate
 
   build-and-push:
@@ -146,7 +146,7 @@ jobs:
           # No token needed for SP env vars
 
       - name: Terraform Init
-        working-directory: terraform
+        working-directory: terraform/environments/prod
         run: terraform init
         env:
           TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
@@ -154,7 +154,7 @@ jobs:
           TF_VAR_cloud_run_image: ${{ env.IMAGE_URI }}
 
       - name: Terraform Plan
-        working-directory: terraform
+        working-directory: terraform/environments/prod
         run: terraform plan -input=false
         env:
           TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
@@ -169,7 +169,7 @@ jobs:
           TF_VAR_system_instructions: ${{ secrets.SYSTEM_INSTRUCTIONS }}
 
       - name: Terraform Apply
-        working-directory: terraform
+        working-directory: terraform/environments/prod
         run: terraform apply -auto-approve -input=false
         env:
           TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
