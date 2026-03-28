@@ -11,6 +11,9 @@ hide:
 
 **AI-powered real-time voice interviewer bot** — conduct natural, sub-second latency conversations through phone calls or your local microphone.
 
+[![CI](https://img.shields.io/github/actions/workflow/status/TheWinterShadow/GhostBrain/lint-test.yml?branch=main&logo=github&label=CI)](https://github.com/TheWinterShadow/GhostBrain/actions/workflows/lint-test.yml)
+[![Deploy](https://img.shields.io/github/actions/workflow/status/TheWinterShadow/GhostBrain/deploy.yml?branch=main&logo=googlecloud&label=Deploy)](https://github.com/TheWinterShadow/GhostBrain/actions/workflows/deploy.yml)
+[![Docs](https://img.shields.io/github/actions/workflow/status/TheWinterShadow/GhostBrain/docs.yml?branch=main&logo=markdown&label=Docs)](https://github.com/TheWinterShadow/GhostBrain/actions/workflows/docs.yml)
 [![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg?logo=python&logoColor=white)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/TheWinterShadow/GhostBrain/blob/main/LICENSE)
 [![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=flat&logo=fastapi)](https://fastapi.tiangolo.com/)
