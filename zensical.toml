@@ -14,10 +14,10 @@ repo_url = "https://github.com/TheWinterShadow/GhostBrain"
 edit_uri = "edit/main/docs/"
 
 nav = [
-  { "Home" = "index.md" },
-  { "Architecture" = "architecture/index.md" },
-  { "Local Testing" = "local-testing/index.md" },
-  { "Self-Hosting" = [
+  { "🏠 Home" = "index.md" },
+  { "🏗️ Architecture" = "architecture/index.md" },
+  { "🧪 Local Testing" = "local-testing/index.md" },
+  { "☁️ Self-Hosting" = [
     { "Setup Guide" = "self-hosting/index.md" },
     { "Customization" = [
       { "Overview" = "customization/index.md" },
@@ -28,7 +28,7 @@ nav = [
       { "Custom Context" = "customization/context.md" }
     ]}
   ]},
-  { "API Reference" = [
+  { "📚 API Reference" = [
     { "Application" = "api/app.md" },
     { "Configuration" = "api/config.md" },
     { "Handlers" = [
@@ -55,7 +55,7 @@ nav = [
       { "Transcript" = "api/utils/transcript.md" }
     ]}
   ]},
-  { "Infrastructure" = "infrastructure/index.md" }
+  { "⚙️ Infrastructure" = "infrastructure/index.md" }
 ]
 
 # ── Markdown extensions ──────────────────────────────────────────────────────
