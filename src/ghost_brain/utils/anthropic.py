@@ -14,7 +14,8 @@ class AnthropicClient:
         self, system_prompt: str, transcript: str, model: str = "claude-3-5-sonnet-20241022"
     ) -> list[dict[str, str]]:
         """
-        Sends the transcript and templates to Claude, expecting a structured JSON list of files back.
+        Sends the transcript and templates to Claude,
+        expecting a structured JSON list of files back.
         """
         logger.info(f"Sending transcript to Anthropic using model {model}")
 
@@ -26,7 +27,9 @@ class AnthropicClient:
                 messages=[
                     {
                         "role": "user",
-                        "content": f"Here is the transcript. Please process it according to the system instructions and output strictly a JSON list.\n\n<transcript>\n{transcript}\n</transcript>",
+                        "content": f"Here is the transcript. Please process it according to the "
+                        f"system instructions and output strictly a JSON list."
+                        f"\n\n<transcript>\n{transcript}\n</transcript>",
                     }
                 ],
                 temperature=0.2,

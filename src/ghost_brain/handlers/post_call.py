@@ -73,10 +73,8 @@ async def post_call_handler(request: Request) -> Response:
         logger.info("Ignoring file %s (either processed or not .txt)", file_name)
         return Response(status_code=200, content="Ignored file")
 
-    if bucket_name == "Unknown" or file_name == "Unknown" or file_name.startswith("objects/"):
-        # ce-subject often looks like "objects/transcript.txt".
-        if file_name.startswith("objects/"):
-            file_name = file_name.split("objects/")[1]
+    if file_name.startswith("objects/"):
+        file_name = file_name.split("objects/")[1]
 
     if bucket_name == "Unknown" or file_name == "Unknown":
         logger.warning("Missing bucket or file name in payload")
@@ -100,16 +98,21 @@ async def post_call_handler(request: Request) -> Response:
         templates_text = "No specific templates provided. Just write a summary markdown file."
 
     system_prompt = f"""You are an intelligent transcript analyzer and markdown generator.
-You will be provided with a raw voice transcript. Your goal is to analyze the transcript and convert the conversation into one or more beautifully formatted markdown files based on the templates provided below.
+You will be provided with a raw voice transcript. Your goal is to analyze the transcript
+and convert the conversation into one or more beautifully formatted markdown files based
+on the templates provided below.
 
 If the user talks about a single topic, choose the best matching template.
-If the user talks about multiple distinct topics (e.g., their daily journal AND a new project idea), split the information into MULTIPLE distinct files, choosing the appropriate template for each. Fill out the templates intelligently based on what the user said.
+If the user talks about multiple distinct topics (e.g., their daily journal AND a new project
+idea), split the information into MULTIPLE distinct files, choosing the appropriate template
+for each. Fill out the templates intelligently based on what the user said.
 
 Available Templates:
 {templates_text}
 
 OUTPUT FORMAT:
-You must output ONLY a valid JSON list containing dictionaries for each file. Do not include any conversational text.
+You must output ONLY a valid JSON list containing dictionaries for each file. Do not
+include any conversational text.
 Example format:
 [
   {{
@@ -144,7 +147,7 @@ Example format:
             continue
 
         # Prepend 'processed/' so we don't infinitely trigger the Eventarc webhook
-        # Eventarc filters on the bucket, so any new file triggers this again unless we filter it out.
+        # Eventarc filters on the bucket, so any new file triggers this again.
         safe_name = f"processed/{out_name}"
 
         try:

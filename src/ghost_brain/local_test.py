@@ -83,7 +83,7 @@ class LocalTestBot:
 
         # Join or create a Daily room
         if self.room_url:
-            await transport.join(self.room_url)
+            await transport.join(self.room_url)  # type: ignore[attr-defined]
             logger.info(f"Joined existing room: {self.room_url}")
         else:
             # DailyTransport doesn't expose a create() method directly.
@@ -215,7 +215,7 @@ class LocalTestBot:
 
             # Cleanup
             if self.transport:
-                await self.transport.leave()
+                await self.transport.leave()  # type: ignore[attr-defined]
 
 
 async def main() -> None:

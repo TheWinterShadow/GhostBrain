@@ -26,7 +26,7 @@ def create_context_and_aggregators(
     Returns:
         Tuple of (context, user_aggregator, assistant_aggregator).
     """
-    context = LLMContext(tools=ToolsSchema(standard_tools=[search_web]))
+    context = LLMContext(tools=ToolsSchema(standard_tools=[search_web]))  # type: ignore[arg-type]
     vad_analyzer = SileroVADAnalyzer(
         sample_rate=sample_rate,
         params=VADParams(stop_secs=0.2),
@@ -36,4 +36,4 @@ def create_context_and_aggregators(
         context,
         user_params=user_params,
     )
-    return context, user_aggregator, assistant_aggregator
+    return context, user_aggregator, assistant_aggregator  # type: ignore[return-value]

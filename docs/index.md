@@ -66,6 +66,7 @@ Test GhostBrain locally with your microphone — no Twilio setup required.
     GHOST_BRAIN_DEEPGRAM_API_KEY="your-deepgram-key"
     GHOST_BRAIN_GROQ_API_KEY="your-groq-key"
     GHOST_BRAIN_OPENAI_API_KEY="your-openai-key"
+    GHOST_BRAIN_ANTHROPIC_API_KEY="your-anthropic-key"
     EOF
 
     # 3. Run local microphone test
@@ -93,17 +94,17 @@ Test GhostBrain locally with your microphone — no Twilio setup required.
 
     Every conversation is automatically transcribed and uploaded to a secure Google Cloud Storage bucket when the call ends.
 
--   :material-lightning-bolt: **Asynchronous processing**
+-   :material-file-document-multiple-outline: **Intelligent File Splitting**
 
     ---
 
-    Eventarc triggers a decoupled post-call processor to summarize or evaluate conversations without slowing down the live caller.
+    Post-call processing uses **Anthropic Claude 3.5 Sonnet** to intelligently parse your transcripts, split them by topic, and format them into beautiful Markdown templates (e.g. Daily Logs, Project Ideas) that are saved back to your cloud storage.
 
--   :material-shield-check: **Production quality**
+-   :material-lightning-bolt: **Decoupled Architecture**
 
     ---
 
-    Strict Python 3.12 typing, Ruff linting, Pytest coverage, and pre-commit hooks ensure enterprise-grade stability.
+    Eventarc triggers a secondary serverless Cloud Run processor to analyze transcripts without stealing CPU or causing latency for live voice callers.
 
 -   :material-laptop: **Local testing**
 

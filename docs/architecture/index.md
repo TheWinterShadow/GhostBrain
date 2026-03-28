@@ -4,13 +4,11 @@ description: GhostBrain system design, components, and data flow.
 icon: material/information-outline
 ---
 
-
 # GhostBrain Architecture
 
 ## Overview
 
-GhostBrain is a real-time voice AI interviewer bot that conducts natural conversations through phone calls or local microphone. It combines state-of-the-art speech recognition, language understanding, and voice synthesis to create a seamless conversational experience.
-
+GhostBrain is a real-time voice AI interviewer bot that conducts natural conversations through phone calls or local microphone. It combines state-of-the-art speech recognition, language understanding, and voice synthesis to create a seamless conversational experience. Crucially, it decouples live caller latency from post-call analysis by utilizing an event-driven serverless architecture.
 
 ## System Architecture
 
@@ -22,23 +20,36 @@ flowchart TD
         W["🌐 Daily WebRTC"]
     end
 
-    F["⚡ FastAPI WebSocket Endpoint"]
+    subgraph Live ["Live Calling Service (Cloud Run)"]
+        F["⚡ FastAPI WebSocket Endpoint"]
+
+        subgraph Pipeline ["Pipecat Voice Pipeline"]
+            direction TB
+            TR["Transport"] -->|"Audio"| STT["Deepgram STT"]
+            STT -->|"Text"| VAD["Silero VAD"]
+            VAD -->|"Intent"| LLM["Groq Llama-3.3-70B"]
+            LLM -->|"Text Response"| TTS["OpenAI TTS"]
+            TTS -->|"Synthesized Audio"| TR
+        end
+    end
 
     T <-->|"Audio Stream"| F
     M <-->|"Audio Stream"| F
     W <-->|"Audio Stream"| F
+    F <-->|"Frames"| TR
 
-    subgraph Pipeline ["Pipecat Voice Pipeline"]
-        direction TB
-        TR["Transport"] -->|"Audio"| STT["Deepgram STT"]
-        STT -->|"Text"| VAD["Silero VAD"]
-        VAD -->|"Intent"| LLM["Groq Llama-3.1-70B"]
-        LLM -->|"Text Response"| TTS["OpenAI TTS"]
-        TTS -->|"Synthesized Audio"| TR
+    F -.->|"Upload transcript"| S["🪣 GCS Transcript Storage"]
+
+    subgraph Async ["Post-Call Processing"]
+        E["⚡ Eventarc Trigger"]
+        P["⚙️ Post-Call Service (Cloud Run)"]
+        A["🧠 Anthropic Claude"]
     end
 
-    F <-->|"Frames"| TR
-    TTS -.->|"Save to GCS"| S["🪣 Transcript Storage"]
+    S -->|"Object Finalized"| E
+    E -->|"Webhook"| P
+    P <-->|"Summarize & Split"| A
+    P -.->|"Save Markdown Files"| S
 ```
 
 ## Core Components
@@ -56,21 +67,15 @@ The system accepts audio input from multiple sources:
   - Direct PCM audio capture
   - No telephony overhead
 
-- **Daily WebRTC**: Browser-based testing
-  - 16kHz sample rate
-  - WebRTC peer-to-peer connection
-  - Shareable room URLs for collaboration
-
-### 2. **FastAPI Application**
-Central web application managing WebSocket connections:
+### 2. **Live Service (FastAPI)**
+Central web application managing active WebSocket connections:
 
 - **Endpoint**: `/ws` - Accepts Twilio Media Stream connections
-- **Health Check**: `/health` - For load balancer/Cloud Run monitoring
 - **Async Architecture**: Full async/await pattern for concurrent connections
-- **Session Management**: Tracks call sessions and manages cleanup
+- **Transcript Upload**: Uploads the raw text transcript to GCS immediately upon call hangup.
 
 ### 3. **Pipecat Pipeline**
-The heart of the system - a composable pipeline for real-time voice processing:
+The heart of the live system - a composable pipeline for real-time voice processing:
 
 ```mermaid
 flowchart LR
@@ -83,69 +88,44 @@ flowchart LR
     TR_OUT --> AA["Assistant Aggregator"]
 ```
 
-Each component processes audio/text frames in real-time:
-
-- **Frames**: Atomic units of data (audio chunks, text, control signals)
-- **Streaming**: Continuous processing without waiting for complete utterances
-- **Backpressure**: Automatic flow control to prevent overwhelming any component
-
 ### 4. **Voice Activity Detection (VAD)**
 **Model**: Silero VAD
 - Detects when users start/stop speaking
 - Configurable pause detection (0.2-0.5 seconds)
 - Prevents interruptions and crosstalk
-- Filters background noise
 
 ### 5. **Speech-to-Text (STT)**
 **Service**: Deepgram
 **Model**: `nova-2`
 - Industry-leading accuracy for conversational speech
-- Real-time streaming transcription
-- Low latency (<300ms)
-- Automatic punctuation and capitalization
-- Speaker diarization capable
+- Real-time streaming transcription (<300ms latency)
 
 ### 6. **Large Language Model (LLM)**
 **Service**: Groq
 **Model**: `llama-3.3-70b-versatile`
-- 70 billion parameter model
-- Optimized for conversational AI
-- Ultra-fast inference (Groq LPU architecture)
-- Context window: 8,192 tokens
-- System prompt customization for interviewer personality
+- Ultra-fast inference (Groq LPU architecture) optimized for <200ms TTFT (Time to First Token) to keep conversations natural.
 
 ### 7. **Text-to-Speech (TTS)**
 **Service**: OpenAI
 **Model**: `tts-1`
 **Voice**: `alloy`
-- Natural-sounding synthesized speech
-- Low latency streaming
-- Consistent voice characteristics
-- Clear articulation for phone audio
+- Natural-sounding synthesized speech optimized for latency.
 
-### 8. **Context Management**
-LLM Context tracks conversation history:
-- User utterances
-- Assistant responses
-- Maintains conversation flow
-- Enables follow-up questions
-- Powers transcript generation
+### 8. **Post-Call Processing (Eventarc & Anthropic)**
+To prevent heavy processing from stealing CPU cycles from live callers, analysis is handled by a separate Cloud Run service:
 
-### 9. **Storage Layer**
-**Google Cloud Storage** for persistent data:
-- Call transcripts saved as text files
-- Organized by date and session ID
-- Automatic retention policies
-- Integration with BigQuery for analytics
+- **Eventarc**: Listens for file drops in the GCS bucket.
+- **Anthropic Claude 3.5 Sonnet**: Analyzes the raw transcript, intelligently splits the user's thoughts into multiple topics, and formats them into beautiful Markdown using predefined templates (e.g. Daily Logs, Project Ideas).
+- **Storage Loop**: The generated markdown files are saved back into the `processed/` prefix of the GCS bucket.
 
 ## Data Flow
 
-### Phone Call Flow (Production)
+### Live Phone Call Flow
 ```mermaid
 sequenceDiagram
     actor U as User
     participant T as Twilio
-    participant CR as Cloud Run (FastAPI)
+    participant CR as Cloud Run (Live)
     participant P as Pipecat Pipeline
     participant G as GCS
 
@@ -161,28 +141,23 @@ sequenceDiagram
     end
     U->>T: Hangs Up
     T->>CR: Disconnects
-    CR->>G: Saves Transcript
+    CR->>G: Uploads raw transcript.txt
 ```
 
-### Local Testing Flow
+### Post-Call Async Flow
 ```mermaid
 sequenceDiagram
-    actor U as User
-    participant S as Local Script
-    participant M as PyAudio / Daily
-    participant P as Pipecat Pipeline
+    participant G as GCS
+    participant E as Eventarc
+    participant PC as Cloud Run (Post-Call)
+    participant A as Anthropic Claude
 
-    U->>S: Runs Script
-    S->>M: Captures Input
-    loop Audio Streaming
-        U->>M: Speaks
-        M->>P: Audio Stream
-        P->>P: STT → LLM → TTS
-        P->>M: Audio Stream
-        M->>U: Hears Response (Speakers)
-    end
-    U->>S: Exits (Ctrl+C)
-    S->>S: Saves Transcript Locally
+    G->>E: Fires Object Finalized Event
+    E->>PC: Triggers POST /events/post-call
+    PC->>G: Downloads raw transcript
+    PC->>A: Prompts with Context & Templates
+    A-->>PC: Returns structured JSON files
+    PC->>G: Uploads processed/ template files
 ```
 
 ## Deployment Architecture
@@ -192,152 +167,31 @@ sequenceDiagram
 ```mermaid
 flowchart TD
     subgraph GCP ["Google Cloud Project"]
-        CR["☁️ Cloud Run Service"]
+        CR_LIVE["☁️ Cloud Run (Live)"]
+        CR_POST["☁️ Cloud Run (Post-Call)"]
         GCS["🪣 Cloud Storage Bucket"]
-        CB["🏗️ Cloud Build"]
+        EV["⚡ Eventarc"]
         SM["🔐 Secret Manager"]
 
-        CB -.->|"Deploys to"| CR
-        CR -->|"Reads Keys"| SM
-        CR -->|"Saves Transcripts"| GCS
+        CR_LIVE -->|"Uploads transcript"| GCS
+        GCS -->|"Triggers"| EV
+        EV -->|"Invokes"| CR_POST
+
+        CR_LIVE -->|"Reads Keys"| SM
+        CR_POST -->|"Reads Keys"| SM
     end
 ```
 
-**Cloud Run**: Serverless container platform
-- Auto-scaling (0 to N instances)
-- HTTPS endpoint with managed SSL
-- WebSocket support
-- Pay-per-use pricing
-
-**Secret Manager**: Secure credential storage
-- API keys for Deepgram, Groq, OpenAI, Twilio
-- Automatic rotation support
-- IAM-based access control
-
-**Cloud Storage**: Object storage for transcripts
-- High durability (99.999999999%)
-- Lifecycle management
-- Cross-region replication option
-
-**Cloud Build**: CI/CD pipeline
-- Triggered on GitHub push
-- Builds Docker container
-- Deploys to Cloud Run
-- Zero-downtime deployments
-
-### Infrastructure as Code
-
-**Terraform** manages all GCP resources:
-```hcl
-modules/
-├── cloud_run/     # Service configuration
-├── storage/       # GCS bucket setup
-├── secrets/       # Secret Manager
-├── iam/          # Service accounts & permissions
-└── monitoring/   # Logging & alerting
-```
+**Infrastructure as Code**: Terraform manages all GCP resources natively, automatically provisioning the Eventarc triggers, Pub/Sub permissions, and binding Secret Manager versions to the Cloud Run services.
 
 ## Performance Characteristics
 
-### Latency Budget
+### Latency Budget (Live Service)
 - **STT Latency**: ~200-300ms (Deepgram streaming)
 - **LLM Latency**: ~100-200ms (Groq LPU)
 - **TTS Latency**: ~150-250ms (OpenAI streaming)
-- **Network**: ~50-100ms (depends on geography)
+- **Network**: ~50-100ms
 - **Total End-to-End**: ~500-850ms
 
 ### Scalability
-- **Concurrent Calls**: Limited by Cloud Run instance count
-- **Max Instance Count**: Configurable (default: 100)
-- **Instance Capacity**: ~10-20 concurrent WebSockets per instance
-- **Cold Start**: ~2-3 seconds (container initialization)
-
-### Cost Optimization
-- **Cloud Run**: Pay only for active call time
-- **Minimum Instances**: 0 (scales to zero)
-- **CPU Allocation**: Only during request processing
-- **Storage**: Minimal (text transcripts only)
-
-## Security Model
-
-### Authentication & Authorization
-- **Twilio Signature Validation**: Verifies webhook authenticity
-- **API Key Management**: All keys in Secret Manager
-- **Service Account**: Minimal GCP permissions
-- **Network Security**: HTTPS/WSS only
-
-### Data Privacy
-- **No Audio Recording**: Only transcripts saved
-- **Encryption**: TLS in transit, AES-256 at rest
-- **Data Retention**: Configurable lifecycle policies
-- **PII Handling**: No automatic PII detection (can be added)
-
-## Monitoring & Observability
-
-### Logging
-- **Application Logs**: Structured JSON to Cloud Logging
-- **Access Logs**: HTTP/WebSocket requests
-- **Error Tracking**: Exception stack traces
-- **Performance Metrics**: Latency, throughput
-
-### Health Checks
-- **/health endpoint**: Simple liveness check
-- **Cloud Run Probes**: Automatic restart on failure
-- **Uptime Monitoring**: External synthetic checks
-
-## Development Workflow
-
-### Local Development
-1. **Environment Setup**: Python 3.12, Hatch, pre-commit
-2. **Local Testing**: PyAudio or Daily transport
-3. **Unit Tests**: Pytest with mocked services
-4. **Integration Tests**: Against real APIs (dev keys)
-
-### CI/CD Pipeline
-1. **Pre-commit Hooks**: Ruff linting/formatting
-2. **GitHub Actions**: Test on push
-3. **Cloud Build**: Build and deploy on main
-4. **Terraform**: Infrastructure updates
-
-## Model Selection Rationale
-
-### Why These Models?
-
-**Deepgram Nova-2 (STT)**
-- Best accuracy for conversational speech
-- Excellent background noise handling
-- Fast streaming capability
-- Cost-effective at scale
-
-**Llama 3.1 70B via Groq (LLM)**
-- Open-source model (no vendor lock-in)
-- Groq's LPU delivers fastest inference
-- Large enough for complex reasoning
-- Excellent instruction following
-
-**OpenAI TTS-1 (TTS)**
-- Most natural-sounding voices
-- Reliable streaming API
-- Good phone audio quality
-- Reasonable pricing
-
-**Silero VAD**
-- Lightweight and fast
-- Works well at 8kHz and 16kHz
-- Open-source
-- No API dependency
-
-## Future Enhancements
-
-### Planned Features
-- **Multi-language Support**: Expand beyond English
-- **Custom Voices**: Clone specific voice characteristics
-- **Sentiment Analysis**: Real-time emotional understanding
-- **Call Analytics**: Conversation insights and metrics
-- **Web Interface**: Browser-based calling option
-
-### Potential Optimizations
-- **Edge Deployment**: Run VAD/STT closer to users
-- **Model Fine-tuning**: Custom models for specific domains
-- **Caching**: Reduce repeated LLM calls
-- **Batching**: Process multiple streams efficiently
+- **Decoupled Workloads**: By moving LLM analysis and JSON parsing to a secondary `Post-Call` Cloud Run service, the `Live` service maintains real-time WebSocket stability without CPU starvation.
