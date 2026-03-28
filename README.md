@@ -7,9 +7,11 @@ A real-time voice AI interviewer bot that conducts natural conversations through
 - 🎙️ **Real-time voice conversations** - Natural, low-latency dialogue
 - 📞 **Phone integration** - Call via Twilio phone numbers
 - 🖥️ **Local testing** - Test with your microphone, no phone needed
-- 🤖 **Advanced AI stack** - Deepgram STT, Llama 3.1 70B, OpenAI TTS
+- 🤖 **Advanced AI stack** - Deepgram STT, Llama-3.3-70B on Groq, OpenAI TTS
+- ⚡ **Decoupled architecture** - Live calling and post-call analytics separated via Eventarc to ensure 0-latency degradation.
 - ☁️ **Cloud-native** - Runs on Google Cloud Run, scales to zero
-- 📝 **Automatic transcripts** - Saves all conversations
+- 📝 **Intelligent transcripts** - Anthropic Claude 3.5 Sonnet parses recordings into markdown templates
+- 📚 **Beautiful docs** - Built with Material for MkDocs & Zensical
 
 ## Quick Start
 
@@ -45,6 +47,7 @@ Create a `.env` file with your API keys:
 GHOST_BRAIN_DEEPGRAM_API_KEY=your_deepgram_key
 GHOST_BRAIN_GROQ_API_KEY=your_groq_key
 GHOST_BRAIN_OPENAI_API_KEY=your_openai_key
+GHOST_BRAIN_ANTHROPIC_API_KEY=your_anthropic_key
 
 # Optional: For production with Twilio
 GHOST_BRAIN_TWILIO_ACCOUNT_SID=your_sid
@@ -93,16 +96,20 @@ Phone/Mic → Audio Input → Speech-to-Text → LLM → Text-to-Speech → Audi
 - **FastAPI** - WebSocket server for real-time communication
 - **Pipecat** - Orchestrates the voice pipeline
 - **Deepgram Nova-2** - Converts speech to text with high accuracy
-- **Llama 3.1 70B on Groq** - Generates intelligent responses
+- **Llama 3.3 70B on Groq** - Generates intelligent responses with ultra-low latency
 - **OpenAI TTS** - Converts responses to natural speech
 - **Silero VAD** - Detects when users start/stop talking
+- **Eventarc + Cloud Run Post-Call** - Decoupled async service to handle summarization
+- **Anthropic Claude 3.5 Sonnet** - Post-call LLM to split transcripts into Markdown files
 
 ## Documentation
 
-- 📘 [Architecture Guide](docs/architecture.md) - System design and data flow
-- 🧪 [Local Testing Guide](docs/local-testing.md) - Test without phone setup
-- 🚀 [Self-Hosting Setup Guide](docs/setup.md) - Deploy to Google Cloud
-- 🤖 [Agent Guidelines](AGENTS.md) - For AI coding assistants
+View the complete beautiful SPA documentation at `docs/index.md` (or serve it with `zensical`).
+
+- 📘 **Architecture Guide** (`docs/architecture/index.md`) - System design and data flow
+- 🧪 **Local Testing Guide** (`docs/local_testing/index.md`) - Test without phone setup
+- 🚀 **Self-Hosting Setup Guide** (`docs/setup/index.md`) - Deploy to Google Cloud
+- 🤖 **Agent Guidelines** (`AGENTS.md`) - For AI coding assistants
 
 ## Development
 
@@ -158,6 +165,7 @@ For full instructions on how to self-host and deploy your own instance with Terr
 | `GHOST_BRAIN_DEEPGRAM_API_KEY` | Deepgram API key for STT | Yes |
 | `GHOST_BRAIN_GROQ_API_KEY` | Groq API key for LLM | Yes |
 | `GHOST_BRAIN_OPENAI_API_KEY` | OpenAI API key for TTS | Yes |
+| `GHOST_BRAIN_ANTHROPIC_API_KEY` | Anthropic API key for Post-Call AI | Yes |
 | `GHOST_BRAIN_TWILIO_ACCOUNT_SID` | Twilio account SID | For phone calls |
 | `GHOST_BRAIN_TWILIO_AUTH_TOKEN` | Twilio auth token | For phone calls |
 | `GHOST_BRAIN_GCS_BUCKET` | GCS bucket for transcripts | For cloud storage |
