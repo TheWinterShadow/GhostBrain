@@ -66,3 +66,14 @@ resource "google_eventarc_trigger" "post_call_trigger" {
     google_cloud_run_v2_service_iam_member.eventarc_invoker
   ]
 }
+
+# Google Storage Service Account must have Pub/Sub Publisher role to publish events to Eventarc
+data "google_storage_project_service_account" "gcs_account" {
+  project = var.project_id
+}
+
+resource "google_project_iam_member" "gcs_pubsub_publishing" {
+  project = var.project_id
+  role    = "roles/pubsub.publisher"
+  member  = "serviceAccount:${data.google_storage_project_service_account.gcs_account.email_address}"
+}
