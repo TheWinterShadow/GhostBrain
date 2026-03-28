@@ -1,12 +1,20 @@
 """Main FastAPI application assembly."""
 
 import logging
+import sys
 
 from fastapi import FastAPI
 
 from ghost_brain.__about__ import __version__
 from ghost_brain.handlers.post_call import router as post_call_router
 from ghost_brain.handlers.websocket import router as websocket_router
+
+# Configure global logging for the application
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(levelname)s:\t  %(name)s - %(message)s",
+    stream=sys.stdout,
+)
 
 logger = logging.getLogger(__name__)
 
