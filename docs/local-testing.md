@@ -175,17 +175,14 @@ DAILY_ROOM_URL=https://your-domain.daily.co/existing-room hatch run python -m gh
 
 ### Audio Flow
 
-```
-Your Microphone
-      ↓
-PyAudio/Daily Capture (16kHz PCM)
-      ↓
-Pipecat Pipeline
-      ├─→ Deepgram STT (speech → text)
-      ├─→ Groq LLM (text → response)
-      └─→ OpenAI TTS (response → speech)
-      ↓
-Your Speakers
+```mermaid
+flowchart TD
+    M["🎤 Your Microphone"] --> C["PyAudio/Daily Capture<br/>(16kHz PCM)"]
+    C --> P{"Pipecat Pipeline"}
+    P -->|"speech → text"| STT["Deepgram STT"]
+    STT -->|"text → response"| LLM["Groq LLM"]
+    LLM -->|"response → speech"| TTS["OpenAI TTS"]
+    TTS --> S["🔊 Your Speakers"]
 ```
 
 ### Key Differences from Production
@@ -363,7 +360,7 @@ Check your firewall isn't blocking:
 
 After successful local testing:
 
-1. **Deploy to Cloud Run** - See [deployment guide](deployment.md)
+1. **Deploy to Cloud Run** - See [Self-Hosting Setup Guide](setup.md)
 2. **Set up Twilio** - Configure phone numbers and webhooks
 3. **Add monitoring** - Set up logging and alerts
 4. **Customize personality** - Adjust system prompts for your use case

@@ -24,5 +24,9 @@ terraform {
       source  = "twilio/twilio"
       version = ">= 0.18.0"
     }
+    http = {
+      source  = "hashicorp/http"
+      version = "~> 3.4.0"
+    }
   }
 }

@@ -9,16 +9,26 @@ logger = logging.getLogger(__name__)
 
 
 class AudioLogger(FrameProcessor):
-    """Logs details about audio frames passing through."""
+    """Processor that logs details about audio frames passing through the pipeline."""
 
-    def __init__(self, name: str = "AudioLogger"):
+    def __init__(self, name: str = "AudioLogger") -> None:
+        """Initialize the audio logger.
+
+        Args:
+            name: The display name used in log output.
+        """
         super().__init__()
-        self._name = name
-        self._log_every = 50  # Log every 50th frame to avoid spam
-        self._count = 0
+        self._name: str = name
+        self._log_every: int = 50
+        self._count: int = 0
 
-    async def process_frame(self, frame: Frame, direction: FrameDirection):
-        # Always log system frames to see if they are passing through
+    async def process_frame(self, frame: Frame, direction: FrameDirection) -> None:
+        """Process and potentially log an incoming frame.
+
+        Args:
+            frame: The frame to inspect and pass through.
+            direction: The direction of the frame in the pipeline.
+        """
         if not isinstance(frame, AudioRawFrame | TextFrame):
             logger.debug("[%s] System frame: %s", self._name, frame)
 

@@ -28,9 +28,10 @@ dev = [
   "pytest-cov>=5.0",
   "ruff>=0.8",
   "pre-commit>=4.0",
-  "sphinx>=7.0",
-  "sphinx-rtd-theme>=2.0",
+
+
   "zensical",
+  "mkdocstrings[python]",
   "pyaudio",  # Only for local dev
 ]
 

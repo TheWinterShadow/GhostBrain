@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 class LocalTestBot:
     """Bot for local testing with microphone using Daily transport."""
 
-    def __init__(self, settings: Settings, room_url: str | None = None):
+    def __init__(self, settings: Settings, room_url: str | None = None) -> None:
         """Initialize the local test bot.
 
         Args:
@@ -157,7 +157,7 @@ class LocalTestBot:
 
         return pipeline, task
 
-    async def run(self):
+    async def run(self) -> None:
         """Run the local test bot."""
         try:
             # Setup transport
@@ -177,13 +177,15 @@ class LocalTestBot:
             if self.transport:
 
                 @self.transport.event_handler("on_participant_joined")
-                async def on_participant_joined(transport, participant):
+                async def on_participant_joined(
+                    transport: DailyTransport, participant: dict
+                ) -> None:
                     # When someone joins, queue the start frame
                     logger.info(f"Participant joined: {participant['id']} - Queueing start frame")
                     await task.queue_frames([LLMRunFrame()])
 
             # Trigger manually in case participant already joined or we're running without one
-            async def trigger_start():
+            async def trigger_start() -> None:
                 await asyncio.sleep(2)
                 logger.info("Queueing start frame...")
                 await task.queue_frames([LLMRunFrame()])
@@ -216,7 +218,7 @@ class LocalTestBot:
                 await self.transport.leave()
 
 
-async def main():
+async def main() -> None:
     """Main entry point for local testing."""
     # Load settings
     settings = get_settings()

@@ -4,46 +4,34 @@
 
 GhostBrain is a real-time voice AI interviewer bot that conducts natural conversations through phone calls or local microphone. It combines state-of-the-art speech recognition, language understanding, and voice synthesis to create a seamless conversational experience.
 
+
 ## System Architecture
 
-```
-┌─────────────────────┐
-│   Input Sources     │
-├─────────────────────┤
-│ • Twilio Phone Call │
-│ • Local Microphone  │
-│ • Daily WebRTC      │
-└──────────┬──────────┘
-           │
-           ▼
-┌─────────────────────┐
-│  FastAPI WebSocket  │
-│     Endpoint        │
-└──────────┬──────────┘
-           │
-           ▼
-┌─────────────────────────────────────────────┐
-│           Pipecat Voice Pipeline            │
-├─────────────────────────────────────────────┤
-│                                             │
-│  ┌──────────┐    ┌──────────┐    ┌────────┐│
-│  │Transport │───▶│   STT    │───▶│  VAD   ││
-│  │(Audio In)│    │(Deepgram)│    │(Silero)││
-│  └──────────┘    └──────────┘    └────────┘│
-│                                      │      │
-│                                      ▼      │
-│  ┌──────────┐    ┌──────────┐    ┌────────┐│
-│  │Transport │◀───│   TTS    │◀───│  LLM   ││
-│  │(Audio Out)    │ (OpenAI) │    │ (Groq) ││
-│  └──────────┘    └──────────┘    └────────┘│
-│                                             │
-└─────────────────────┬───────────────────────┘
-                      │
-                      ▼
-         ┌────────────────────────┐
-         │   Google Cloud Storage │
-         │   (Transcript Storage) │
-         └────────────────────────┘
+```mermaid
+flowchart TD
+    subgraph Clients
+        T["📞 Twilio Phone Call"]
+        M["🎤 Local Microphone"]
+        W["🌐 Daily WebRTC"]
+    end
+
+    F["⚡ FastAPI WebSocket Endpoint"]
+
+    T <-->|"Audio Stream"| F
+    M <-->|"Audio Stream"| F
+    W <-->|"Audio Stream"| F
+
+    subgraph Pipeline ["Pipecat Voice Pipeline"]
+        direction TB
+        TR["Transport"] -->|"Audio"| STT["Deepgram STT"]
+        STT -->|"Text"| VAD["Silero VAD"]
+        VAD -->|"Intent"| LLM["Groq Llama-3.1-70B"]
+        LLM -->|"Text Response"| TTS["OpenAI TTS"]
+        TTS -->|"Synthesized Audio"| TR
+    end
+
+    F <-->|"Frames"| TR
+    TTS -.->|"Save to GCS"| S["🪣 Transcript Storage"]
 ```
 
 ## Core Components
@@ -77,9 +65,15 @@ Central web application managing WebSocket connections:
 ### 3. **Pipecat Pipeline**
 The heart of the system - a composable pipeline for real-time voice processing:
 
-```python
-Pipeline Flow:
-Transport Input → STT → VAD → User Aggregator → LLM → TTS → Transport Output → Assistant Aggregator
+```mermaid
+flowchart LR
+    TR_IN["Transport Input"] --> STT["STT"]
+    STT --> VAD["VAD"]
+    VAD --> UA["User Aggregator"]
+    UA --> LLM["LLM"]
+    LLM --> TTS["TTS"]
+    TTS --> TR_OUT["Transport Output"]
+    TR_OUT --> AA["Assistant Aggregator"]
 ```
 
 Each component processes audio/text frames in real-time:
@@ -140,48 +134,66 @@ LLM Context tracks conversation history:
 ## Data Flow
 
 ### Phone Call Flow (Production)
-```
-1. User calls Twilio phone number
-2. Twilio initiates WebSocket to Cloud Run endpoint
-3. FastAPI accepts WebSocket connection
-4. Pipecat pipeline initialized with Twilio transport
-5. Audio streams bidirectionally:
-   - Inbound: Phone → Twilio → WebSocket → Pipeline → STT → LLM
-   - Outbound: LLM → TTS → Pipeline → WebSocket → Twilio → Phone
-6. On disconnect: Transcript saved to GCS
+```mermaid
+sequenceDiagram
+    actor U as User
+    participant T as Twilio
+    participant CR as Cloud Run (FastAPI)
+    participant P as Pipecat Pipeline
+    participant G as GCS
+
+    U->>T: Calls Phone Number
+    T->>CR: Initiates WebSocket
+    CR->>P: Initializes Pipeline
+    loop Audio Streaming
+        U->>T: Speaks
+        T->>P: Audio Stream (Inbound)
+        P->>P: STT → LLM → TTS
+        P->>T: Audio Stream (Outbound)
+        T->>U: Hears Response
+    end
+    U->>T: Hangs Up
+    T->>CR: Disconnects
+    CR->>G: Saves Transcript
 ```
 
 ### Local Testing Flow
-```
-1. Run local test script
-2. PyAudio/Daily captures microphone input
-3. Audio processed through same pipeline
-4. Responses played through local speakers
-5. Transcript saved locally on exit
+```mermaid
+sequenceDiagram
+    actor U as User
+    participant S as Local Script
+    participant M as PyAudio / Daily
+    participant P as Pipecat Pipeline
+
+    U->>S: Runs Script
+    S->>M: Captures Input
+    loop Audio Streaming
+        U->>M: Speaks
+        M->>P: Audio Stream
+        P->>P: STT → LLM → TTS
+        P->>M: Audio Stream
+        M->>U: Hears Response (Speakers)
+    end
+    U->>S: Exits (Ctrl+C)
+    S->>S: Saves Transcript Locally
 ```
 
 ## Deployment Architecture
 
 ### Google Cloud Platform
 
-```
-┌─────────────────────────────────────────────┐
-│              Google Cloud Project           │
-├─────────────────────────────────────────────┤
-│                                             │
-│  ┌─────────────┐        ┌─────────────┐    │
-│  │  Cloud Run  │        │   Cloud     │    │
-│  │  Service    │───────▶│   Storage   │    │
-│  │             │        │   Bucket    │    │
-│  └─────────────┘        └─────────────┘    │
-│         ▲                                   │
-│         │                                   │
-│  ┌─────────────┐        ┌─────────────┐    │
-│  │   Cloud     │        │   Secret    │    │
-│  │   Build     │        │   Manager   │    │
-│  └─────────────┘        └─────────────┘    │
-│                                             │
-└─────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    subgraph GCP ["Google Cloud Project"]
+        CR["☁️ Cloud Run Service"]
+        GCS["🪣 Cloud Storage Bucket"]
+        CB["🏗️ Cloud Build"]
+        SM["🔐 Secret Manager"]
+
+        CB -.->|"Deploys to"| CR
+        CR -->|"Reads Keys"| SM
+        CR -->|"Saves Transcripts"| GCS
+    end
 ```
 
 **Cloud Run**: Serverless container platform

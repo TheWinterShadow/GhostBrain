@@ -11,10 +11,11 @@ from pipecat.services.llm_service import FunctionCallParams
 logger = logging.getLogger(__name__)
 
 
-async def search_web(params: FunctionCallParams, query: str):
+async def search_web(params: FunctionCallParams, query: str) -> None:
     """Search the web for real-time information, facts, and documentation.
 
     Args:
+        params: Function call parameters injected by Pipecat.
         query: The search query to look up on the web.
     """
     logger.info(f"LLM Tool Call: Searching web for '{query}'")

@@ -22,15 +22,24 @@ def register_handlers(
     settings: Settings,
     session_id: str,
 ) -> None:
-    """
-    Register transport event handlers for client connect/disconnect.
+    """Register transport event handlers for client connect and disconnect.
 
-    On connect: queue LLMRunFrame so the bot speaks first.
-    On disconnect: format transcript from context.messages, upload to GCS, then cancel task.
+    Args:
+        transport: The WebSocket transport for handling connections.
+        task: The active pipeline task.
+        context: LLM context containing conversation history.
+        settings: Application settings.
+        session_id: The unique identifier for the current session.
     """
 
     @transport.event_handler("on_client_connected")
     async def on_client_connected(_transport: Any, _client: Any) -> None:
+        """Handle new client connection and initiate the conversation.
+
+        Args:
+            _transport: The transport instance.
+            _client: The connected client object.
+        """
         logger.info("Client connected! Queueing initial LLMRunFrame.")
         msg = (
             "The user has connected to the phone call. "
@@ -46,6 +55,12 @@ def register_handlers(
 
     @transport.event_handler("on_client_disconnected")
     async def on_client_disconnected(_transport: Any, _client: Any) -> None:
+        """Handle client disconnection, process the transcript, and clean up.
+
+        Args:
+            _transport: The transport instance.
+            _client: The disconnected client object.
+        """
         try:
             messages = getattr(context, "messages", []) or []
             if messages:
@@ -68,8 +83,10 @@ def register_handlers(
 
 
 async def run_pipeline(task: PipelineTask) -> None:
-    """
-    Run the pipeline task with the default runner (no SIGINT handling for Cloud Run).
+    """Execute the pipeline task.
+
+    Args:
+        task: The configured pipeline task to run.
     """
     runner = PipelineRunner(handle_sigint=False)
     await runner.run(task)

@@ -1,9 +1,9 @@
-"""Transcript formatting and GCS upload for call recordings."""
+"""Transcript formatting and Google Cloud Storage upload utilities."""
 
 import contextlib
 import uuid
 from datetime import UTC, datetime
-from typing import Any
+from typing import Any, cast
 
 from google.cloud import storage
 from pipecat.processors.aggregators.llm_context import LLMContext
@@ -15,33 +15,31 @@ def format_transcript_markdown(
     date: datetime | None = None,
 ) -> str:
     """
-    Format conversation messages as Markdown with YAML frontmatter.
+    Format a list of conversation messages into a Markdown document.
+
+    Includes YAML frontmatter with session and temporal metadata.
 
     Args:
-        messages: List of dicts with 'role' ('user'|'assistant') and 'content'.
-        session_id: Optional session/call ID; defaults to a new UUID.
-        date: Optional date; defaults to now (UTC).
+        messages: A list of message dictionaries containing 'role' and 'content' keys.
+        session_id: An optional unique identifier for the conversation session.
+        date: An optional timestamp for the conversation.
 
     Returns:
-        Markdown string with frontmatter and message body.
+        str: The formatted Markdown string containing the transcript.
     """
-    sid = session_id or str(uuid.uuid4())
-    dt = date or datetime.now(UTC)
-    date_str = dt.strftime("%Y-%m-%dT%H:%M:%SZ")
+    sid: str = session_id or str(uuid.uuid4())
+    dt: datetime = date or datetime.now(UTC)
+    date_str: str = dt.strftime("%Y-%m-%dT%H:%M:%SZ")
 
-    frontmatter = f"""---
-Date: {date_str}
-ID: {sid}
----
+    frontmatter: str = f"---\nDate: {date_str}\nID: {sid}\n---\n\n"
 
-"""
     body_lines: list[str] = []
     for msg in messages:
-        role = msg.get("role", "unknown")
-        content = msg.get("content", "")
+        role: str = msg.get("role", "unknown")
+        content: Any = msg.get("content", "")
+
         if isinstance(content, list):
-            # Handle content list (e.g. multi-modal)
-            text_parts = [c.get("text", "") for c in content if c.get("type") == "text"]
+            text_parts: list[str] = [c.get("text", "") for c in content if c.get("type") == "text"]
             content = " ".join(text_parts)
 
         if role == "user":
@@ -55,18 +53,24 @@ ID: {sid}
 
 
 def format_transcript(context: LLMContext) -> str:
-    """Format transcript from LLMContext."""
-    messages = []
-    # context.messages returns a list of LLMContextMessage (which are dicts or objects)
+    """
+    Extract and format transcript messages from an LLMContext instance.
+
+    Args:
+        context: The language model context containing the conversation history.
+
+    Returns:
+        str: The formatted Markdown string of the conversation.
+    """
+    messages: list[dict[str, Any]] = []
+
     for msg in context.messages:
         if isinstance(msg, dict):
-            messages.append(msg)
+            messages.append(cast(dict[str, Any], msg))
         elif hasattr(msg, "message"):
-            # Handle LLMSpecificMessage wrapper
             if isinstance(msg.message, dict):
-                messages.append(msg.message)
+                messages.append(cast(dict[str, Any], msg.message))
             else:
-                # Try to extract dict from object if it's a Pydantic model or similar
                 with contextlib.suppress(AttributeError):
                     messages.append(msg.message.model_dump())
 
@@ -80,17 +84,18 @@ def upload_transcript_to_gcs(
     content_type: str = "text/markdown",
 ) -> None:
     """
-    Upload transcript content to a GCS bucket.
+    Upload a text payload to a specified Google Cloud Storage bucket.
 
     Args:
-        bucket_name: Name of the GCS bucket.
-        content: String content (Markdown) to upload.
-        blob_path: Object path within the bucket (e.g. 'transcripts/abc.md').
-        content_type: MIME type; defaults to 'text/markdown'.
+        bucket_name: The destination GCS bucket name.
+        content: The text content to upload.
+        blob_path: The destination path and filename within the bucket.
+        content_type: The MIME type of the uploaded content.
     """
-    client = storage.Client()
-    bucket = client.bucket(bucket_name)
-    blob = bucket.blob(blob_path)
+    client: storage.Client = storage.Client()
+    bucket: storage.Bucket = client.bucket(bucket_name)
+    blob: storage.Blob = bucket.blob(blob_path)
+
     blob.upload_from_string(
         content,
         content_type=content_type,

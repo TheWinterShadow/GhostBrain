@@ -3,11 +3,21 @@
 variable "project_id" {
   description = "GCP project ID."
   type        = string
+
+  validation {
+    condition     = length(var.project_id) > 0
+    error_message = "Project ID must not be empty."
+  }
 }
 
 variable "region" {
   description = "GCP region."
   type        = string
+
+  validation {
+    condition     = can(regex("^[a-z]+-[a-z]+\\d+$", var.region))
+    error_message = "Region must be a valid GCP region name (e.g., us-central1)."
+  }
 }
 
 variable "cloud_run_image" {
@@ -23,6 +33,11 @@ variable "ghost_brain_service_name" {
 variable "bucket_name_prefix" {
   description = "Prefix for the GCS bucket name."
   type        = string
+
+  validation {
+    condition     = length(var.bucket_name_prefix) > 0 && length(var.bucket_name_prefix) <= 50
+    error_message = "Bucket name prefix must be between 1 and 50 characters."
+  }
 }
 
 # Sensitive variables passed from root

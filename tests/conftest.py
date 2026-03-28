@@ -1,5 +1,6 @@
 """Pytest fixtures and configuration for Ghost Brain tests."""
 
+from collections.abc import Generator
 from unittest.mock import MagicMock
 
 import pytest
@@ -9,7 +10,7 @@ from ghost_brain.config import Settings
 
 @pytest.fixture
 def mock_settings() -> Settings:
-    """Settings with non-empty stub values for testing."""
+    """Provide Settings with non-empty stub values for testing."""
     return Settings(
         groq_api_key="test-groq",
         deepgram_api_key="test-deepgram",
@@ -21,8 +22,8 @@ def mock_settings() -> Settings:
 
 
 @pytest.fixture
-def sample_messages() -> list[dict]:
-    """Sample conversation messages (OpenAI-style) for transcript tests."""
+def sample_messages() -> list[dict[str, str]]:
+    """Provide sample conversation messages for transcript tests."""
     return [
         {"role": "user", "content": "Hello."},
         {"role": "assistant", "content": "Hi! How can I help you today?"},
@@ -31,7 +32,7 @@ def sample_messages() -> list[dict]:
 
 
 @pytest.fixture(autouse=True)
-def reset_settings_cache() -> None:
+def reset_settings_cache() -> Generator[None, None, None]:
     """Reset the global settings cache so tests get fresh Settings."""
     import ghost_brain.config as config_module
 
@@ -42,7 +43,7 @@ def reset_settings_cache() -> None:
 
 @pytest.fixture
 def mock_storage_bucket() -> MagicMock:
-    """Mock GCS bucket and blob for upload tests."""
+    """Provide a mock GCS bucket and blob for upload tests."""
     mock_blob = MagicMock()
     mock_bucket = MagicMock()
     mock_bucket.blob.return_value = mock_blob

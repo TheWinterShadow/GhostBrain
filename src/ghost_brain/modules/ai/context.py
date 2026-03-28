@@ -1,13 +1,13 @@
 """LLM Context and VAD factory."""
 
-from typing import Any
-
 from pipecat.adapters.schemas.tools_schema import ToolsSchema
 from pipecat.audio.vad.silero import SileroVADAnalyzer
 from pipecat.audio.vad.vad_analyzer import VADParams
 from pipecat.processors.aggregators.llm_context import LLMContext
 from pipecat.processors.aggregators.llm_response_universal import (
+    LLMAssistantAggregator,
     LLMContextAggregatorPair,
+    LLMUserAggregator,
     LLMUserAggregatorParams,
 )
 
@@ -16,7 +16,7 @@ from ghost_brain.tools.search import search_web
 
 def create_context_and_aggregators(
     sample_rate: int = 8000,
-) -> tuple[LLMContext, Any, Any]:
+) -> tuple[LLMContext, LLMUserAggregator, LLMAssistantAggregator]:
     """
     Create shared LLM context and user/assistant context aggregators with VAD.
 

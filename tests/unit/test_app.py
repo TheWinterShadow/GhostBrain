@@ -28,8 +28,7 @@ def test_openapi_schema(client: TestClient) -> None:
 
 
 def test_incoming_call(client: TestClient) -> None:
-    """Incoming call should return TwiML with WebSocket stream."""
-    # Test HTTPS scheme logic
+    """Return TwiML with WebSocket stream for incoming call."""
     r = client.post("https://test-server.com/incoming-call", headers={"host": "test-server.com"})
     assert r.status_code == 200
     assert r.headers["content-type"] == "application/xml"

@@ -1,0 +1,23 @@
+formatter: "markdown table"
+
+header-from: "main.tf"
+footer-from: ""
+
+content: |-
+  # Infrastructure Details
+
+  {{ .Header }}
+
+  ## Inputs
+  {{ .Inputs }}
+
+  ## Outputs
+  {{ .Outputs }}
+
+output:
+  file: "../../../docs/infrastructure.md"
+  mode: inject
+  template: |-
+    <!-- BEGIN_TF_DOCS -->
+    {{ .Content }}
+    <!-- END_TF_DOCS -->

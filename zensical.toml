@@ -2,12 +2,102 @@
 
 [project]
 site_name = "Ghost Brain"
-site_url = "https://github.com/ghost_brain/ghost_brain"
+site_url = "https://thewintershadow.github.io/GhostBrain"
 site_description = "Voice-interviewer bot documentation"
 docs_dir = "docs"
 site_dir = "site"
+
+repo_url = "https://github.com/TheWinterShadow/GhostBrain"
+repo_name = "TheWinterShadow/GhostBrain"
+
 nav = [
-  { "Home" = "index.md" },
-  { "Status" = "status.md" },
-  { "API Reference" = "/api/" }
+  { "🏠 Home" = "index.md" },
+  { "🏗️ Architecture" = "architecture.md" },
+  { "🧪 Local Testing" = "local-testing.md" },
+  { "☁️ Self-Hosting" = [
+    { "Setup Guide" = "setup.md" },
+    { "Customization" = [
+      { "Overview" = "customization/index.md" },
+      { "Adding Tools" = "customization/tools.md" },
+      { "Switching STT" = "customization/stt.md" },
+      { "Switching the Brain (LLM)" = "customization/llm.md" },
+      { "Switching TTS" = "customization/tts.md" },
+      { "Custom Context" = "customization/context.md" }
+    ]}
+  ]},
+  { "📚 API Reference" = [
+    { "Application" = "api/app.md" },
+    { "Configuration" = "api/config.md" },
+    { "Handlers" = [
+      { "WebSocket" = "api/handlers/websocket.md" },
+      { "Post-Call" = "api/handlers/post_call.md" }
+    ]},
+    { "Modules" = [
+      { "AI" = [
+        { "Context" = "api/modules/ai/context.md" },
+        { "LLM" = "api/modules/ai/llm.md" },
+        { "STT" = "api/modules/ai/stt.md" },
+        { "TTS" = "api/modules/ai/tts.md" }
+      ]},
+      { "Pipeline" = [
+        { "Pipeline" = "api/modules/pipeline/pipeline.md" },
+        { "Runner" = "api/modules/pipeline/runner.md" },
+        { "Debug" = "api/modules/pipeline/debug.md" }
+      ]}
+    ]},
+    { "Transport" = [
+      { "Twilio" = "api/transport/twilio.md" }
+    ]},
+    { "Utils" = [
+      { "Transcript" = "api/utils/transcript.md" }
+    ]}
+  ]},
+  { "⚙️ Infrastructure" = "infrastructure.md" }
+]
+
+[project.theme]
+name = "material"
+icon = { logo = "fontawesome/solid/ghost" }
+features = [
+    "navigation.tabs",
+    "navigation.top",
+    "search.suggest",
+    "search.highlight"
+]
+
+[[project.theme.palette]]
+scheme = "default"
+primary = "indigo"
+accent = "indigo"
+toggle = { icon = "material/brightness-7", name = "Switch to dark mode" }
+
+[[project.theme.palette]]
+scheme = "slate"
+primary = "indigo"
+accent = "indigo"
+toggle = { icon = "material/brightness-4", name = "Switch to light mode" }
+
+[project.plugins.search]
+[project.plugins.autorefs]
+
+[project.plugins.mkdocstrings.handlers.python]
+paths = ["src"]
+[project.plugins.mkdocstrings.handlers.python.options]
+docstring_style = "google"
+show_source = false
+show_root_heading = true
+show_signature_annotations = true
+show_if_no_docstring = true
+members_order = "source"
+show_bases = false
+
+[project.markdown_extensions."pymdownx.highlight"]
+[project.markdown_extensions."pymdownx.inlinehilite"]
+[project.markdown_extensions."pymdownx.emoji"]
+[project.markdown_extensions.attr_list]
+[project.markdown_extensions.md_in_html]
+[project.markdown_extensions.admonition]
+[project.markdown_extensions."pymdownx.superfences"]
+custom_fences = [
+  { name = "mermaid", class = "mermaid", format = "pymdownx.superfences.fence_code_format" }
 ]

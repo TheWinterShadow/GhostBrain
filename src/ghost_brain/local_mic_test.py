@@ -39,7 +39,7 @@ from pipecat.processors.frame_processor import FrameDirection, FrameProcessor
 from pipecat.transports.local.audio import LocalAudioTransport, LocalAudioTransportParams
 
 from ghost_brain.config import Settings, get_settings
-from ghost_brain.core.pipeline import build_pipeline
+from ghost_brain.modules.pipeline.pipeline import build_pipeline
 from ghost_brain.utils.transcript import format_transcript
 
 logging.basicConfig(level=logging.INFO)
@@ -49,11 +49,11 @@ logger = logging.getLogger(__name__)
 class MuteInputMonitor(FrameProcessor):
     """Processor to mute input transport when bot is speaking."""
 
-    def __init__(self, input_transport):
+    def __init__(self, input_transport: LocalAudioTransport) -> None:
         super().__init__()
         self.input_transport = input_transport
 
-    async def process_frame(self, frame: Frame, direction: FrameDirection):
+    async def process_frame(self, frame: Frame, direction: FrameDirection) -> None:
         if isinstance(frame, BotStartedSpeakingFrame):
             logger.info("Bot started speaking - muting input")
             self.input_transport._params.audio_in_enabled = False
@@ -67,7 +67,7 @@ class MuteInputMonitor(FrameProcessor):
 class LocalMicrophoneBot:
     """Bot for testing with local microphone instead of Twilio."""
 
-    def __init__(self, settings: Settings):
+    def __init__(self, settings: Settings) -> None:
         self.settings = settings
         self.context = LLMContext()
         # Local transport usually needs 16k/24k, but we force 8k to match production
@@ -97,7 +97,7 @@ class LocalMicrophoneBot:
 
         return pipeline, task
 
-    async def run(self):
+    async def run(self) -> None:
         """Run the bot with local microphone."""
         try:
             # Build pipeline
@@ -118,7 +118,7 @@ class LocalMicrophoneBot:
             task_params = PipelineTaskParams(loop=asyncio.get_running_loop())
 
             # Start a background task to trigger the bot to speak first
-            async def trigger_start():
+            async def trigger_start() -> None:
                 await asyncio.sleep(2)  # Give pipeline time to initialize
                 print("Bot connecting...")
                 await task.queue_frames([LLMRunFrame()])
@@ -148,7 +148,7 @@ class LocalMicrophoneBot:
                 print(transcript)
 
 
-async def main():
+async def main() -> None:
     """Main entry point."""
     # Check for required environment variables
     settings = get_settings()

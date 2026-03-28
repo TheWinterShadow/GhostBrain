@@ -6,8 +6,8 @@ from unittest.mock import MagicMock, patch
 from ghost_brain.utils.transcript import format_transcript_markdown, upload_transcript_to_gcs
 
 
-def test_format_transcript_markdown_basic(sample_messages: list[dict]) -> None:
-    """Format should produce frontmatter and user/assistant lines."""
+def test_format_transcript_markdown_basic(sample_messages: list[dict[str, str]]) -> None:
+    """Format markdown to produce frontmatter and user/assistant lines."""
     out = format_transcript_markdown(sample_messages, session_id="call-123")
     assert "Date:" in out
     assert "ID: call-123" in out
@@ -16,25 +16,26 @@ def test_format_transcript_markdown_basic(sample_messages: list[dict]) -> None:
     assert "**User:** I'd like to schedule an interview." in out
 
 
-def test_format_transcript_markdown_defaults_session_id(sample_messages: list[dict]) -> None:
-    """When session_id is None, a UUID should be used."""
+def test_format_transcript_markdown_defaults_session_id(
+    sample_messages: list[dict[str, str]],
+) -> None:
+    """Use a UUID when session_id is None."""
     out = format_transcript_markdown(sample_messages, session_id=None)
     assert "ID:" in out
     assert "ID: unknown" not in out
-    # Should look like a UUID (contains dashes)
     line = next(line for line in out.splitlines() if line.startswith("ID:"))
     assert len(line) > 10
 
 
-def test_format_transcript_markdown_custom_date(sample_messages: list[dict]) -> None:
-    """Custom date should appear in frontmatter."""
+def test_format_transcript_markdown_custom_date(sample_messages: list[dict[str, str]]) -> None:
+    """Include custom date in frontmatter."""
     dt = datetime(2025, 3, 1, 12, 0, 0, tzinfo=UTC)
     out = format_transcript_markdown(sample_messages, session_id="x", date=dt)
     assert "2025-03-01T12:00:00Z" in out
 
 
 def test_format_transcript_markdown_unknown_role() -> None:
-    """Messages with unknown role should still be included."""
+    """Include messages with unknown roles in transcript."""
     messages = [{"role": "system", "content": "You are helpful."}]
     out = format_transcript_markdown(messages, session_id="s")
     assert "**system:**" in out
@@ -43,10 +44,10 @@ def test_format_transcript_markdown_unknown_role() -> None:
 
 @patch("ghost_brain.utils.transcript.storage.Client")
 def test_upload_transcript_to_gcs(
-    mock_client_class: object,
+    mock_client_class: MagicMock,
     mock_storage_bucket: MagicMock,
 ) -> None:
-    """Upload should call bucket.blob and upload_from_string."""
+    """Call bucket.blob and upload_from_string for transcript upload."""
     mock_client_class.return_value.bucket.return_value = mock_storage_bucket
     upload_transcript_to_gcs(
         "my-bucket",

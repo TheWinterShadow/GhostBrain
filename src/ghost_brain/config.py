@@ -1,14 +1,15 @@
-"""Application configuration from environment variables."""
+"""Application configuration management via environment variables and settings."""
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
     """
-    Runtime settings loaded from environment (and .env).
+    Application configuration settings.
 
-    All API keys and the GCS bucket name are read from the environment.
-    In production these are typically injected via Secret Manager (Cloud Run).
+    Loads runtime configuration from environment variables and the local `.env` file.
+    API keys and external service identifiers are managed here and injected
+    via Secret Manager in production deployments.
     """
 
     model_config = SettingsConfigDict(env_file=".env", env_prefix="GHOST_BRAIN_", extra="ignore")
@@ -20,7 +21,6 @@ class Settings(BaseSettings):
     twilio_account_sid: str = ""
     twilio_auth_token: str = ""
 
-    # Personality Configuration
     ai_name: str = "Orion"
     allowed_caller_id: str = ""
     system_instructions: str = (
@@ -42,10 +42,10 @@ _settings: Settings | None = None
 
 def get_settings() -> Settings:
     """
-    Return cached settings; load from env on first call.
+    Retrieve the singleton application settings instance.
 
     Returns:
-        Settings: The application settings instance.
+        Settings: The cached configuration settings.
     """
     global _settings
     if _settings is None:

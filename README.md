@@ -101,7 +101,7 @@ Phone/Mic → Audio Input → Speech-to-Text → LLM → Text-to-Speech → Audi
 
 - 📘 [Architecture Guide](docs/architecture.md) - System design and data flow
 - 🧪 [Local Testing Guide](docs/local-testing.md) - Test without phone setup
-- 🚀 [Deployment Guide](deployment.md) - Deploy to Google Cloud
+- 🚀 [Self-Hosting Setup Guide](docs/setup.md) - Deploy to Google Cloud
 - 🤖 [Agent Guidelines](AGENTS.md) - For AI coding assistants
 
 ## Development
@@ -145,24 +145,9 @@ ghost_brain/
 
 ## Deployment
 
-GhostBrain runs on Google Cloud Platform:
+GhostBrain is designed to run on Google Cloud Platform using Cloud Run, Cloud Storage, and Secret Manager.
 
-1. **Cloud Run** - Serverless container hosting
-2. **Cloud Storage** - Transcript storage
-3. **Secret Manager** - Secure API key storage
-4. **Cloud Build** - Automated CI/CD
-
-Deploy with:
-```bash
-# Build and push Docker image
-docker build -t gcr.io/your-project/ghost-brain .
-docker push gcr.io/your-project/ghost-brain
-
-# Deploy with Terraform
-cd terraform
-terraform init
-terraform apply
-```
+For full instructions on how to self-host and deploy your own instance with Terraform and GitHub Actions, please see the [Self-Hosting Setup Guide](docs/setup.md).
 
 ## Configuration Options
 

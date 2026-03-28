@@ -2,7 +2,7 @@
 
 Welcome to the GhostBrain documentation! GhostBrain is a real-time voice AI interviewer bot that conducts natural conversations through phone calls or local microphone.
 
-## What is GhostBrain?
+## What is GhostBrain? 👻🧠
 
 GhostBrain combines state-of-the-art speech recognition, language models, and voice synthesis to create a seamless conversational AI experience. Whether you're building a voice assistant, conducting automated interviews, or creating interactive voice applications, GhostBrain provides the foundation you need.
 
@@ -15,26 +15,25 @@ GhostBrain combines state-of-the-art speech recognition, language models, and vo
 - ☁️ **Cloud-native architecture** on Google Cloud Platform
 - 📝 **Automatic transcription** of all conversations
 
-## Documentation
+## 📚 Documentation
 
-### Getting Started
+### 🚀 Getting Started
 - [Quick Start Guide](../README.md) - Get up and running in 5 minutes
 - [Local Testing Guide](local-testing.md) - Test with your microphone
-- [API Reference](/api/index.html) - Detailed API documentation
+- [API Reference](api/app.md) - Detailed Python API documentation
 
-### Architecture & Design
+### 🏗️ Architecture & Design
 - [Architecture Overview](architecture.md) - System design, components, and data flow
 - [Voice Pipeline](architecture.md#core-components) - How audio becomes conversation
 - [Model Selection](architecture.md#model-selection-rationale) - Why we chose these AI models
 
-### Deployment & Operations
-- [Deployment Guide](../deployment.md) - Deploy to Google Cloud
+### ☁️ Deployment & Operations
+- [Self-Hosting Setup Guide](setup.md) - Deploy GhostBrain to Google Cloud
 - [Infrastructure](architecture.md#deployment-architecture) - GCP resources and Terraform
 - [Monitoring](architecture.md#monitoring--observability) - Logs, metrics, and health checks
 
 ### Development
 - [Agent Guidelines](../AGENTS.md) - For AI coding assistants
-- [Project Status](status.md) - Current features and roadmap
 - [Contributing](../README.md#contributing) - How to contribute
 
 ## Quick Example
