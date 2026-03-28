@@ -1,3 +1,10 @@
+---
+title: Infrastructure
+description: GhostBrain Google Cloud resource topology.
+icon: material/server
+---
+
+
 # Infrastructure
 
 This page documents the underlying Terraform module (`modules/ghost_brain`) that deploys the GhostBrain architecture.

@@ -1,3 +1,10 @@
+---
+title: Architecture
+description: GhostBrain system design, components, and data flow.
+icon: material/information-outline
+---
+
+
 # GhostBrain Architecture
 
 ## Overview

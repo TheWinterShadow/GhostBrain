@@ -1,3 +1,10 @@
+---
+title: Local Testing Guide
+description: How to test GhostBrain locally using your computer's microphone.
+icon: material/laptop
+---
+
+
 # Local Testing Guide
 
 This guide explains how to test GhostBrain locally using your computer's microphone, without setting up Twilio phone numbers or webhooks.
