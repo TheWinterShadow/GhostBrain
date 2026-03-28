@@ -36,6 +36,16 @@ resource "google_cloud_run_v2_service" "ghost_brain_post_call" {
         }
       }
 
+      env {
+        name = "GHOST_BRAIN_ANTHROPIC_API_KEY"
+        value_source {
+          secret_key_ref {
+            secret  = google_secret_manager_secret.anthropic_api_key.secret_id
+            version = "latest"
+          }
+        }
+      }
+
       resources {
         limits = {
           cpu    = "1"

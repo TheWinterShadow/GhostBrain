@@ -17,6 +17,7 @@ class Settings(BaseSettings):
     groq_api_key: str = ""
     deepgram_api_key: str = ""
     openai_api_key: str = ""
+    anthropic_api_key: str = ""
     gcp_bucket_name: str = ""
     twilio_account_sid: str = ""
     twilio_auth_token: str = ""

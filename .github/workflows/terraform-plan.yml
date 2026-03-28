@@ -38,6 +38,7 @@ jobs:
           TFC_CLIENT_SECRET: ${{ secrets.TFC_CLIENT_SECRET }}
           TF_VAR_project_id: ${{ secrets.GCP_PROJECT_ID }}
           TF_VAR_cloud_run_image: ${{ secrets.TF_VAR_cloud_run_image || 'gcr.io/dummy/ghost_brain:latest' }}
+          TF_VAR_anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           TF_VAR_groq_api_key: ${{ secrets.GROQ_API_KEY || 'dummy' }}
           TF_VAR_deepgram_api_key: ${{ secrets.DEEPGRAM_API_KEY || 'dummy' }}
           TF_VAR_openai_api_key: ${{ secrets.OPENAI_API_KEY || 'dummy' }}

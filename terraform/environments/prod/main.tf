@@ -9,6 +9,7 @@ module "ghost_brain" {
   bucket_name_prefix       = var.bucket_name_prefix
 
   groq_api_key        = var.groq_api_key
+  anthropic_api_key   = var.anthropic_api_key
   deepgram_api_key    = var.deepgram_api_key
   openai_api_key      = var.openai_api_key
   twilio_account_sid  = var.twilio_account_sid

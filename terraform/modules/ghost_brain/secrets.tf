@@ -103,3 +103,23 @@ resource "google_secret_manager_secret_iam_member" "twilio_auth_token" {
   role      = "roles/secretmanager.secretAccessor"
   member    = "serviceAccount:${google_service_account.ghost_brain_bot.email}"
 }
+
+resource "google_secret_manager_secret" "anthropic_api_key" {
+  secret_id = "ghost_brain-anthropic-api-key"
+  project   = var.project_id
+
+  replication {
+    auto {}
+  }
+}
+
+resource "google_secret_manager_secret_version" "anthropic_api_key" {
+  secret      = google_secret_manager_secret.anthropic_api_key.id
+  secret_data = var.anthropic_api_key
+}
+
+resource "google_secret_manager_secret_iam_member" "anthropic_api_key" {
+  secret_id = google_secret_manager_secret.anthropic_api_key.id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${google_service_account.ghost_brain_bot.email}"
+}

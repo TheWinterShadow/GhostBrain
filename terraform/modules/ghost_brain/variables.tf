@@ -84,3 +84,9 @@ variable "system_instructions" {
   sensitive   = true
   default     = ""
 }
+
+variable "anthropic_api_key" {
+  description = "Anthropic API Key"
+  type        = string
+  sensitive   = true
+}
