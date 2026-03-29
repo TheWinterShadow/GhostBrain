@@ -13,6 +13,8 @@ resource "google_cloud_run_v2_service" "ghost_brain_post_call" {
       max_instance_count = 5
     }
 
+    timeout = "120s"
+
     containers {
       image = var.cloud_run_image
 

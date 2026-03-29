@@ -36,6 +36,10 @@ class GCSBucket:
             logging.error(f"Google API error while downloading blob: {e}")
             raise
 
+    def blob_exists(self, blob_name: str) -> bool:
+        blob = self.bucket.blob(blob_name)
+        return blob.exists()
+
     def upload_string_to_blob(self, blob_name: str, content: str) -> None:
         try:
             blob = self.bucket.blob(blob_name)

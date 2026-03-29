@@ -91,7 +91,13 @@ async def post_call_handler(request: Request) -> Response:
         logger.error("Error downloading transcript: %s", e)
         return Response(status_code=500, content="Error downloading transcript")
 
-    # 2. Load Templates and Prepare Prompt
+    # 2. Idempotency check — skip if this transcript was already processed
+    sentinel = f"processed/transcripts/{Path(file_name).name}"
+    if transcript_bucket.blob_exists(sentinel):
+        logger.info("Transcript %s already processed (sentinel found). Skipping.", file_name)
+        return Response(status_code=200, content="Already processed")
+
+    # 3. Load Templates and Prepare Prompt
     templates_text = load_templates()
     if not templates_text:
         logger.warning("No templates found, proceeding with basic summary instructions.")
@@ -107,6 +113,13 @@ If the user talks about multiple distinct topics (e.g., their daily journal AND 
 idea), split the information into MULTIPLE distinct files, choosing the appropriate template
 for each. Fill out the templates intelligently based on what the user said.
 
+IMPORTANT RULES:
+- Do NOT duplicate content across files. Each piece of information should appear in exactly
+  one file. If a topic fits multiple templates, pick the best one.
+- Every file must include relevant tags on the second line (immediately after the # Title),
+  using the format: #tag1 #tag2 #tag3. Choose tags that reflect the content (e.g. #daily-log,
+  #project, #idea, #knowledge, #tasks, #work, #personal). Always include at least one tag.
+
 Available Templates:
 {templates_text}
 
@@ -117,16 +130,16 @@ Example format:
 [
   {{
     "file_name": "daily_log_2023-10-27.md",
-    "file_content": "# Daily Log\\n..."
+    "file_content": "# Daily Log 2023-10-27\\n#daily-log #reflection\\n..."
   }},
   {{
     "file_name": "project_idea_x.md",
-    "file_content": "# Project X\\n..."
+    "file_content": "# Project X\\n#project #idea\\n..."
   }}
 ]
 """
 
-    # 3. Call Anthropic
+    # 4. Call Anthropic
     try:
         anthropic_client = AnthropicClient(api_key=settings.anthropic_api_key)
         generated_files = anthropic_client.process_transcript(
@@ -137,7 +150,7 @@ Example format:
         logger.error("Error calling Anthropic: %s", e)
         return Response(status_code=500, content="Error processing transcript via AI")
 
-    # 4. Save results back to GCS
+    # 5. Save results back to GCS
     for file_data in generated_files:
         out_name = file_data.get("file_name")
         out_content = file_data.get("file_content")
@@ -155,5 +168,12 @@ Example format:
             logger.info("Successfully saved %s back to bucket.", safe_name)
         except Exception as e:
             logger.error("Failed to save %s: %s", safe_name, e)
+
+    # Write sentinel so redelivered events are skipped
+    try:
+        transcript_bucket.upload_string_to_blob(sentinel, "")
+        logger.info("Wrote processing sentinel: %s", sentinel)
+    except Exception as e:
+        logger.warning("Failed to write sentinel %s: %s", sentinel, e)
 
     return Response(status_code=200, content="Post-call logic executed successfully")
