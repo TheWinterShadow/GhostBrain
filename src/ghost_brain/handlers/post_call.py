@@ -69,8 +69,8 @@ async def post_call_handler(request: Request) -> Response:
         bucket_name = bucket_name.split("buckets/")[1]
 
     # Do not process files that are already processed by Anthropic
-    if file_name.startswith("processed/") or not file_name.endswith(".txt"):
-        logger.info("Ignoring file %s (either processed or not .txt)", file_name)
+    if file_name.startswith("processed/"):
+        logger.info("Ignoring file %s (processed file)", file_name)
         return Response(status_code=200, content="Ignored file")
 
     if file_name.startswith("objects/"):
