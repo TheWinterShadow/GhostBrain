@@ -11,7 +11,7 @@ class AnthropicClient:
         self.client = Anthropic(api_key=api_key)
 
     def process_transcript(
-        self, system_prompt: str, transcript: str, model: str = "claude-3-5-sonnet-20241022"
+        self, system_prompt: str, transcript: str, model: str = "claude-sonnet-4-6"
     ) -> list[dict[str, str]]:
         """
         Sends the transcript and templates to Claude,
