@@ -7,7 +7,7 @@ icon: material/rocket-launch
 
 # Self-Hosting Setup Guide
 
-Steps to deploy the GhostBrain voice-interviewer bot on your own Google Cloud Platform (GCP) environment with Twilio. The deployment is fully automated via GitHub Actions and Terraform.
+Steps to deploy the GhostBrain virtual assistant on your own Google Cloud Platform (GCP) environment with Twilio. The deployment is fully automated via GitHub Actions and Terraform.
 
 ---
 

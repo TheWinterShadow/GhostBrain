@@ -8,7 +8,7 @@ icon: material/information-outline
 
 ## Overview
 
-GhostBrain is a real-time voice AI interviewer bot that conducts natural conversations through phone calls or local microphone. It combines state-of-the-art speech recognition, language understanding, and voice synthesis to create a seamless conversational experience. Crucially, it decouples live caller latency from post-call analysis by utilizing an event-driven serverless architecture.
+GhostBrain is a real-time voice AI virtual assistant that conducts natural conversations through phone calls or local microphone. It combines state-of-the-art speech recognition, language understanding, and voice synthesis to create a seamless conversational experience. Crucially, it decouples live caller latency from post-call analysis by utilizing an event-driven serverless architecture.
 
 ## System Architecture
 

@@ -1,6 +1,6 @@
 # GhostBrain 🧠
 
-A real-time voice AI interviewer bot that conducts natural conversations through phone calls or local microphone. Built with FastAPI, Pipecat, and state-of-the-art AI models.
+A real-time voice AI virtual assistant that conducts natural conversations through phone calls or local microphone. Built with FastAPI, Pipecat, and state-of-the-art AI models.
 
 ## Features
 
@@ -176,7 +176,7 @@ For full instructions on how to self-host and deploy your own instance with Terr
 Modify the system prompt in `pipeline.py`:
 ```python
 system_instruction=(
-    "You are Ghost Brain, a friendly voice interviewer. "
+    "You are Ghost Brain, a friendly virtual assistant that helps users flush out ideas and document them. "
     "Keep responses concise and natural for spoken conversation."
 )
 ```

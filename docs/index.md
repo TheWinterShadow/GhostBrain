@@ -1,6 +1,6 @@
 ---
 title: Ghost Brain
-description: AI-powered real-time voice interviewer bot. State-of-the-art speech recognition, language models, and voice synthesis.
+description: AI-powered real-time voice virtual assistant. State-of-the-art speech recognition, language models, and voice synthesis.
 icon: fontawesome/solid/ghost
 hide:
   - navigation
@@ -9,7 +9,7 @@ hide:
 
 # Ghost Brain :fontawesome-solid-ghost:
 
-**AI-powered real-time voice interviewer bot** — conduct natural, sub-second latency conversations through phone calls or your local microphone.
+**AI-powered real-time voice virtual assistant** — conduct natural, sub-second latency conversations through phone calls or your local microphone.
 
 [![Deploy](https://img.shields.io/github/actions/workflow/status/TheWinterShadow/GhostBrain/deploy.yml?branch=main&logo=googlecloud&label=Deploy)](https://github.com/TheWinterShadow/GhostBrain/actions/workflows/deploy.yml)
 [![Docs](https://img.shields.io/github/actions/workflow/status/TheWinterShadow/GhostBrain/docs.yml?branch=main&logo=markdown&label=Docs)](https://github.com/TheWinterShadow/GhostBrain/actions/workflows/docs.yml)
