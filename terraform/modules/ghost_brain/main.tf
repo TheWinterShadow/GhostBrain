@@ -27,6 +27,6 @@ resource "google_service_account" "ghost_brain_bot" {
 # Grant the service account permission to create objects in the bucket.
 resource "google_storage_bucket_iam_member" "ghost_brain_bucket_creator" {
   bucket = google_storage_bucket.transcript_bucket.name
-  role   = "roles/storage.objectCreator"
+  role   = "roles/storage.objectUser"
   member = "serviceAccount:${google_service_account.ghost_brain_bot.email}"
 }
