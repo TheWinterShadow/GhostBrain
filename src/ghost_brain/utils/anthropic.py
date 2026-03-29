@@ -1,7 +1,7 @@
-import json
 import logging
 
 from anthropic import Anthropic
+from anthropic.types import ToolUseBlock
 
 logger = logging.getLogger(__name__)
 
@@ -24,32 +24,43 @@ class AnthropicClient:
                 model=model,
                 max_tokens=4000,
                 system=system_prompt,
+                tools=[
+                    {
+                        "name": "output_results",
+                        "description": "Output the structured results from the transcript",
+                        "input_schema": {
+                            "type": "object",
+                            "properties": {
+                                "results": {
+                                    "type": "array",
+                                    "items": {"type": "object"},
+                                }
+                            },
+                            "required": ["results"],
+                        },
+                    }
+                ],
+                tool_choice={"type": "tool", "name": "output_results"},
                 messages=[
                     {
                         "role": "user",
                         "content": f"Here is the transcript. Please process it according to the "
-                        f"system instructions and output strictly a JSON list."
-                        f"\n\n<transcript>\n{transcript}\n</transcript>",
+                        f"system instructions.\n\n<transcript>\n{transcript}\n</transcript>",
                     }
                 ],
                 temperature=0.2,
             )
 
-            # The response should be pure JSON or wrapped in a json codeblock.
-            content = message.content[0].text.strip()
+            block = message.content[0]
+            if not isinstance(block, ToolUseBlock):
+                raise ValueError(f"Unexpected content block type: {type(block)}")
 
-            # Extract JSON if it's wrapped in markdown blocks
-            if "```json" in content:
-                content = content.split("```json")[1].split("```")[0].strip()
-            elif "```" in content:
-                content = content.split("```")[1].split("```")[0].strip()
+            input_data: dict[str, list[dict[str, str]]] = block.input  # type: ignore[assignment]
+            results = input_data.get("results")
+            if not isinstance(results, list):
+                raise ValueError(f"Expected a list of dicts, got {type(results)}")
 
-            parsed_data = json.loads(content)
-
-            if not isinstance(parsed_data, list):
-                raise ValueError(f"Expected a list of dicts, got {type(parsed_data)}")
-
-            return parsed_data
+            return results
 
         except Exception as e:
             logger.error(f"Error processing transcript with Anthropic: {e}")
