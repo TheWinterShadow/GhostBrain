@@ -116,9 +116,15 @@ for each. Fill out the templates intelligently based on what the user said.
 IMPORTANT RULES:
 - Do NOT duplicate content across files. Each piece of information should appear in exactly
   one file. If a topic fits multiple templates, pick the best one.
-- Every file must include relevant tags on the second line (immediately after the # Title),
-  using the format: #tag1 #tag2 #tag3. Choose tags that reflect the content (e.g. #daily-log,
-  #project, #idea, #knowledge, #tasks, #work, #personal). Always include at least one tag.
+- Every file must include tags on the second line (immediately after the # Title), using the
+  format: #tag1 #tag2 #tag3. Tags must be chosen to make the content easily searchable and
+  retrievable later. Include a mix of:
+  1. Generic category tags (e.g. #daily-log, #project, #idea, #knowledge, #tasks, #work,
+     #personal, #reflection, #meeting, #research)
+  2. Specific tags for the key topics, people, places, emotions, or concepts discussed —
+     think about what words someone would search for to find this content in the future.
+  Use lowercase, hyphenate multi-word tags (e.g. #mental-health, #side-project). Aim for
+  3–6 tags per file. Do not add redundant or overlapping tags.
 
 Available Templates:
 {templates_text}
