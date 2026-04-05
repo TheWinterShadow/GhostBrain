@@ -11,6 +11,8 @@ resource "google_cloud_run_v2_service" "ghost_brain_bot" {
       max_instance_count = 10
     }
 
+    timeout = "3600s"
+
     containers {
       image = var.cloud_run_image
 

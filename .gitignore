@@ -6,3 +6,4 @@ __pycache__/
 .terraform.lock.hcl
 terraform-provider-google_v7.24.0_x5
 site/
+.DS_Store
