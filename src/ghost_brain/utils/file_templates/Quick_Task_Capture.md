@@ -1,12 +1,21 @@
+---
+> **Template Guide — Quick Task Capture**
+> **Lives in:** `00_Inbox/` temporarily, or anywhere in the vault
+> **Purpose:** Fast brain dump when you have a lot of tasks to capture at once. Process it the same day.
+> **After processing:** Delete this file or move tasks to `Main Task List.md` and project notes
+> **Task format:** `- [ ] Description #task #domain 📅 YYYY-MM-DD`
+> **Domain tags:** `#work` `#personal` `#code` `#security` `#homelab` `#finance` `#health` `#career`
+---
+
 # Quick Task Capture
 
-*Use this template when you need to quickly dump tasks from your brain.*
+*Captured: {{date:YYYY-MM-DD}}*
 
 ---
 
-## 🧠 Brain Dump
+## Brain Dump
 
-**Instructions:** Just type your tasks below. Don't worry about dates or organization yet. Process these later.
+*Just type. Add dates and tags later.*
 
 - [ ] #task
 - [ ] #task
@@ -18,45 +27,38 @@
 - [ ] #task
 - [ ] #task
 - [ ] #task
-
----
-
-## 🔄 Processing Checklist
-
-When processing these tasks:
-
-- [ ] Add due dates (📅) to time-sensitive items
-- [ ] Add context tags (#work, #personal, #errands)
-- [ ] Mark priorities with `[!]` instead of `[ ]`
-- [ ] Move project-specific tasks to project notes
-- [ ] Delete tasks that don't matter anymore
-- [ ] Add recurring patterns (🔁) if needed
-- [ ] Link to relevant notes with [[Note Name]]
 
 ---
 
-## 📋 Categories (Optional Sorting)
+## Processing Checklist
 
-### 🏢 Work
+Work through these before closing this file:
+
+- [ ] Add due dates (`📅`) to anything time-sensitive
+- [ ] Add priority markers (`[!]` or `⏫`) to urgent items
+- [ ] Add domain tags (`#work`, `#code`, `#personal`, etc.)
+- [ ] Move project-specific tasks into the relevant project note in `20_Active_Work/`
+- [ ] Move general tasks to `Main Task List.md`
+- [ ] Delete any tasks that no longer matter
+- [ ] Add `🔁 every X` to recurring tasks
+
+---
+
+## Sorted by Domain (Optional)
+
+*Move tasks here as you process them, or skip this section entirely.*
+
+### Work
 - [ ] #task #work
-- [ ] #task #work
 
-### 🏠 Personal
+### Code / Tech
+- [ ] #task #code
+
+### Personal
 - [ ] #task #personal
-- [ ] #task #personal
 
-### 🛒 Errands
-- [ ] #task #errands
-- [ ] #task #errands
+### Finance / Admin
+- [ ] #task #finance
 
-### 📞 Calls & Emails
-- [ ] #task #communication
-- [ ] #task #communication
-
-### 💭 Someday/Maybe
+### Someday / Maybe
 - [ ] #task #someday
-- [ ] #task #someday
-
----
-
-*Date Captured: {{date:YYYY-MM-DD}}*

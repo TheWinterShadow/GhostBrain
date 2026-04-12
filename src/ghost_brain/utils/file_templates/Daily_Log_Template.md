@@ -1,3 +1,11 @@
+---
+> **Template Guide — Daily Log**
+> **Lives in:** `10_Daily_Log/`
+> **Filename:** `YYYY-MM-DD.md`
+> **Also use this folder for:** Personal essays, journal entries, reflective writing — name those `Journal - Topic.md`
+> **Tags:** `#daily-log` + any domain tags that apply today (`#work`, `#personal`, etc.)
+---
+
 #daily-log #date/{{date:YYYY-MM-DD}}
 
 ---
@@ -6,7 +14,7 @@
 
 ---
 
-## 📋 Tasks Due Today
+## Tasks Due Today
 
 ```tasks
 (tag includes #task) OR (description includes #task)
@@ -18,7 +26,7 @@ hide backlink
 
 ---
 
-## ⚡ Overdue (Needs Attention!)
+## Overdue
 
 ```tasks
 (tag includes #task) OR (description includes #task)
@@ -29,20 +37,45 @@ short mode
 
 ---
 
-## ✅ Quick Capture
+## Today's Plan
 
-### Today's Must-Do
+*Your top 3. Keep it realistic.*
+
 - [ ] #task 📅 {{date:YYYY-MM-DD}}
 - [ ] #task 📅 {{date:YYYY-MM-DD}}
 - [ ] #task 📅 {{date:YYYY-MM-DD}}
 
-### Also Today
-- [ ] #task 📅 {{date:YYYY-MM-DD}}
-- [ ] #task 📅 {{date:YYYY-MM-DD}}
+**Also if time:**
+- [ ] #task
+- [ ] #task
 
 ---
 
-## 🏆 Completed Today
+## Notes
+
+*Meeting notes, decisions, things that happened. If it grows into a real project, move it to `20_Active_Work/ProjectName/`.*
+
+
+---
+
+## Events & Meetings
+
+| Time | Event | Notes |
+|------|-------|-------|
+|  |  |  |
+
+---
+
+## Ideas Captured
+
+*Quick ideas go here. If worth keeping, process to `20_Active_Work/Ideas/Idea - Topic.md`.*
+
+-
+-
+
+---
+
+## Completed Today
 
 ```tasks
 (tag includes #task) OR (description includes #task)
@@ -52,66 +85,19 @@ short mode
 
 ---
 
-## 📝 Notes
+## Reflection
 
-### Morning Pages
+*Optional. If this grows into something meaningful, save it as `Journal - Topic.md` in this same folder.*
 
+**What went well:**
 
-### Throughout the Day
+**What to improve:**
 
-
----
-
-## 📅 Events & Meetings
-
-**Time** | **Event** | **Notes**
----------|-----------|----------
- |  | 
+**Tomorrow's top 3:**
+1.
+2.
+3.
 
 ---
 
-## 💡 Ideas & Thoughts
-
-
----
-
-## 💭 Evening Reflection
-
-### What went well today?
-
-
-### What could be improved?
-
-
-### Gratitude
-- 
-- 
-- 
-
-### Tomorrow's Top 3
-1. 
-2. 
-3. 
-
----
-
-## 🔗 Quick Links
-
-- [[Tasks Dashboard]] - Full task overview
-- [[Task Management Guide]] - How to use the system
-- **Yesterday:** [[{{date-1:YYYY-MM-DD}}]]
-- **Tomorrow:** [[{{date+1:YYYY-MM-DD}}]]
-
----
-
-## 📊 Daily Metrics (Optional)
-
-**Energy Level:** ⚡⚡⚡⚡⚡
-**Productivity:** ⭐⭐⭐⭐⭐
-**Mood:** 😊
-**Sleep Quality:** 
-**Exercise:** 
-
----
-
-*Capture fast. Process later. Your Daily Log is your safe space to think.*
+**Yesterday:** [[{{date-1:YYYY-MM-DD}}]] | **Tomorrow:** [[{{date+1:YYYY-MM-DD}}]] | [[Tasks Dashboard]]

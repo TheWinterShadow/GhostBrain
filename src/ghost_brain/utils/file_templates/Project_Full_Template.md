@@ -1,55 +1,48 @@
-#project #type/project #status/active
+---
+> **Template Guide — Project Index Note**
+> **Lives in:** `20_Active_Work/ProjectName/` (this is the main note inside a project's subfolder)
+> **Filename:** `ProjectName.md` (same as the folder name)
+> **Folder structure for a project:**
+> ```
+> 20_Active_Work/ProjectName/
+> ├── ProjectName.md          ← this file (index + status)
+> ├── architecture.md         ← design docs (no prefix needed, folder gives context)
+> ├── Decision - Topic.md     ← decision logs (use Decision_Template)
+> ├── Chat - Topic - Date.md  ← AI chat captures (use Chat_Template)
+> └── ...
+> ```
+> **When done:** Move the entire `ProjectName/` folder to `60_Archives/`
+> **Tags:** `#project` + `#status/active` + domain tags
+---
+
+#project #status/active #
 
 ---
 
-# Project - {{title}}
+# {{title}}
 
-## 📊 Project Overview
+## Overview
 
-**Status:** 🟢 Active | 🟡 On Hold | 🔴 Blocked | ✅ Complete
-**Priority:** 🔥 High | ⚡ Medium | 📌 Low
-**Start Date:** 
-**Target Completion:** 
-**Actual Completion:** 
+**Status:** Active | On Hold | Blocked | Complete
+**Priority:** High | Medium | Low
+**Started:** {{date:YYYY-MM-DD}}
+**Target:**
+**Owner:**
 
-### Description
-*Brief description of what this project is about*
+*What is this project? What does success look like?*
 
-
-### Goals
-- [ ] 
-- [ ] 
-- [ ] 
 
 ---
 
-## 📋 Tasks Overview
+## Goals
 
-### 🔥 Priority / Next Actions
-- [ ] #task 📅 
-- [ ] #task 📅 
-- [ ] #task 📅 
-
-### 🏃 In Progress
-- [/] #task
-- [/] #task
-
-### ⏸️ Waiting On
-- [-] #task
-- [-] #task
-
-### ✅ Completed
-- [x] #task ✅ {{date:YYYY-MM-DD}}
-- [x] #task
-
-### 📥 Backlog (No Date Yet)
-- [ ] #task
-- [ ] #task
-- [ ] #task
+- [ ]
+- [ ]
+- [ ]
 
 ---
 
-## 📋 All Project Tasks
+## Active Tasks
 
 ```tasks
 (tag includes #task) OR (description includes #task)
@@ -59,72 +52,60 @@ not done
 
 ---
 
-## 📈 Progress Tracking
+## Task Capture
 
-**Completion:** ◻️◻️◻️◻️◻️◻️◻️◻️◻️◻️ 0%
+*Add tasks here. Use `#task` so they show on the dashboard.*
 
-### Milestones
-- [ ] Milestone 1 - 
-- [ ] Milestone 2 - 
-- [ ] Milestone 3 - 
+### Priority / Next Up
+- [ ] #task 📅
+- [ ] #task 📅
 
----
+### In Progress
+- [/] #task
 
-## 📚 Resources
+### Waiting On
+- [-] #task
 
-### Links
-- [Website](#)
-- [Documentation](#)
-- [Reference](#)
-
-### Files
-- [[Attachment 1]]
-- [[Attachment 2]]
-
-### Related Notes
-- [[Related Note 1]]
-- [[Related Note 2]]
-
-### People Involved
-- **Project Lead:** 
-- **Stakeholders:** 
-- **Contributors:** 
+### Backlog
+- [ ] #task
+- [ ] #task
 
 ---
 
-## 📝 Project Log
+## Documents in This Folder
+
+*List key files for quick navigation. Update as you add files.*
+
+- [[{{title}}]] ← this file
+-
+
+---
+
+## Key Decisions
+
+*For important decisions, create a `Decision - Topic.md` file. Log quick decisions here.*
+
+| Date | Decision | Why |
+|------|----------|-----|
+|  |  |  |
+
+---
+
+## Notes & Updates
+
+*Running log. Newest at top.*
 
 ### {{date:YYYY-MM-DD}}
 
 
-### Earlier Updates
+---
 
+## People & Resources
+
+**Stakeholders:**
+**Links:**
+**Related projects:**
 
 ---
 
-## 🎯 Key Decisions Made
-
-**Date** | **Decision** | **Rationale**
----------|--------------|---------------
- |  | 
-
----
-
-## ⚠️ Risks & Issues
-
-### Current Risks
-1. 
-
-### Resolved Issues
-1. 
-
----
-
-## 🔗 Quick Links
-
-- [[Tasks Dashboard]] - See all tasks
-- Back to [[20_Active_Work]]
-
----
-
-*Project created: {{date:YYYY-MM-DD}}*
+*Created: {{date:YYYY-MM-DD}}*

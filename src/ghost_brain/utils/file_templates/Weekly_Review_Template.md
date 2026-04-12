@@ -1,26 +1,36 @@
+---
+> **Template Guide — Weekly Review**
+> **Lives in:** `10_Daily_Log/`
+> **Filename:** `YYYY-MM-DD Weekly Review.md` (use the Monday date of the week)
+> **Cadence:** Once a week, ideally Friday afternoon or Sunday evening
+> **Tags:** `#weekly-review`
+---
+
 #weekly-review #date/{{date:YYYY-MM-DD}}
 
 ---
 
-# Weekly Review - Week of {{date:YYYY-MM-DD}}
+# Weekly Review — Week of {{date:YYYY-MM-DD}}
 
 ---
 
-## 🎯 Weekly Focus
+## This Week's Focus
 
-**This week's theme/goal:**
+**Theme / goal:**
 
+**Top 3 I committed to:**
+1.
+2.
+3.
 
-**Top 3 priorities for the week:**
-1. 
-2. 
-3. 
+**Did I hit them? Why / why not:**
+
 
 ---
 
-## 📋 Task Review
+## Task Review
 
-### ⚠️ Overdue Tasks (Need Attention)
+### Overdue (deal with these now)
 
 ```tasks
 (tag includes #task) OR (description includes #task)
@@ -29,26 +39,26 @@ due before {{date:YYYY-MM-DD}}
 short mode
 ```
 
-**Action:** Reschedule or delete these tasks now.
+*For each: reschedule, delegate, or delete.*
 
 ---
 
-### 📥 Tasks Without Due Dates (Process These)
+### No Due Date (process these)
 
 ```tasks
 (tag includes #task) OR (description includes #task)
 not done
 no due date
-limit 50
+limit 30
 group by filename
 short mode
 ```
 
-**Action:** Add due dates or move to someday/maybe.
+*Add a date, move to someday, or delete.*
 
 ---
 
-### ✅ Completed This Week
+### Completed This Week
 
 ```tasks
 (tag includes #task) OR (description includes #task)
@@ -57,149 +67,68 @@ sort by done reverse
 short mode
 ```
 
-**Wins this week:**
-- 
-- 
-- 
+**Wins worth noting:**
+-
+-
 
 ---
 
-## 🎯 Active Projects Review
+## Project Health Check
 
 ```dataview
 TABLE WITHOUT ID
   file.link as "Project",
-  length(file.tasks.text) as "Total Tasks",
-  length(filter(file.tasks, (t) => !t.completed)) as "Open",
-  round((length(filter(file.tasks, (t) => t.completed)) / length(file.tasks.text)) * 100, 0) + "%" as "Done %"
+  length(filter(file.tasks, (t) => !t.completed)) as "Open Tasks"
 FROM "20_Active_Work"
 WHERE file.tasks
 SORT file.name ASC
 ```
 
-### Project Notes
-**Projects on track:**
-- 
+**On track:**
+-
 
-**Projects needing attention:**
-- 
+**Needs attention:**
+-
 
-**Projects to archive:**
-- 
-
----
-
-## 🧹 Cleanup Checklist
-
-- [ ] Processed all items in `00_Inbox`
-- [ ] Reviewed and updated active project notes
-- [ ] Archived completed projects to `40_Archives`
-- [ ] Added due dates to undated tasks or deleted them
-- [ ] Cleared out old daily notes (>30 days if not needed)
-- [ ] Updated recurring tasks that need adjustment
-- [ ] Reviewed "Waiting On" tasks - followed up?
+**Ready to archive → move to `60_Archives/`:**
+-
 
 ---
 
-## 📊 This Week's Stats
+## Folder Sweep
 
-**Total tasks completed:** 
-**New projects started:** 
-**Projects completed:** 
-**Tasks still open:** 
-
----
-
-## 💭 Reflection
-
-### What worked well this week?
-
-
-### What didn't work?
-
-
-### What am I learning about my workflow?
-
-
-### What needs to change?
-
+- [ ] `00_Inbox` — processed everything, nothing >30 days old
+- [ ] `20_Active_Work` — all active projects still active? Archive any that are done.
+- [ ] `40_Career` — any job search material to archive?
+- [ ] `45_Life_Admin` — any outdated info to delete or update?
+- [ ] Reviewed "Waiting On" tasks — followed up where needed
 
 ---
 
-## 📅 Next Week Planning
+## Reflection
 
-### Week of {{date+7:YYYY-MM-DD}}
+**What worked well:**
 
-**Weekly goal/theme:**
+**What didn't:**
 
+**What I'm learning about how I work:**
 
-**Top 3 priorities:**
+---
+
+## Next Week Planning
+
+**Week of {{date+7:YYYY-MM-DD}}**
+
+**Theme:**
+
+**Top 3:**
 1. [ ] #task 📅 {{date+7:YYYY-MM-DD}}
 2. [ ] #task 📅 {{date+7:YYYY-MM-DD}}
 3. [ ] #task 📅 {{date+7:YYYY-MM-DD}}
 
-**Big rocks for next week:**
-- Monday: 
-- Tuesday: 
-- Wednesday: 
-- Thursday: 
-- Friday: 
-
 **Upcoming deadlines:**
-- 
+-
 
 ---
 
-## 🎨 Lifestyle & Wellbeing
-
-**Energy level this week:** ⚡⚡⚡⚡⚡
-
-**Work-life balance:** ⭐⭐⭐⭐⭐
-
-**Exercise/Movement:**
-- [ ] Monday
-- [ ] Tuesday  
-- [ ] Wednesday
-- [ ] Thursday
-- [ ] Friday
-- [ ] Weekend
-
-**Self-care highlights:**
-- 
-- 
-
-**Social connections:**
-- 
-
----
-
-## 💡 Ideas & Insights
-
-### New ideas captured this week
-- 
-
-### Articles/Books that inspired me
-- 
-
-### Skills I want to develop
-- 
-
----
-
-## 🔗 Quick Links
-
-- [[Tasks Dashboard]]
-- **Last Week:** [[{{date-7:YYYY-MM-DD}}]]
-- **Next Week:** [[{{date+7:YYYY-MM-DD}}]]
-- [[Task Management Guide]]
-
----
-
-## 📝 Additional Notes
-
-
----
-
-*Weekly review completed: {{date:YYYY-MM-DD}} at {{time}}*
-
-**Remember:** You can't do everything. Focus on what matters most.
+**Last week:** [[{{date-7:YYYY-MM-DD}}]] | **Next week:** [[{{date+7:YYYY-MM-DD}}]] | [[Tasks Dashboard]]
