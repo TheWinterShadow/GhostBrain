@@ -87,7 +87,7 @@ async def websocket_endpoint(websocket: WebSocket) -> None:
     session_id = call_data.get("call_id", "") or "unknown"
     serializer = create_twilio_serializer(call_data, settings)
     transport = create_transport(websocket, serializer)
-    _, task, context = await build_pipeline(transport, settings, sample_rate=8000)
+    _, task, context, mcp_bridge = await build_pipeline(transport, settings, sample_rate=8000)
     register_handlers(transport, task, context, settings, session_id)
 
     try:
@@ -97,4 +97,6 @@ async def websocket_endpoint(websocket: WebSocket) -> None:
     except Exception as e:
         logger.exception("Pipeline error for session %s: %s", session_id, e)
     finally:
+        if mcp_bridge is not None:
+            await mcp_bridge.disconnect()
         await task.cancel()

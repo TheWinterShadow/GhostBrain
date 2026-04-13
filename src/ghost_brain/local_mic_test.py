@@ -70,6 +70,7 @@ class LocalMicrophoneBot:
     def __init__(self, settings: Settings) -> None:
         self.settings = settings
         self.context = LLMContext()
+        self._mcp_bridge = None
         # Local transport usually needs 16k/24k, but we force 8k to match production
         self.transport = LocalAudioTransport(
             params=LocalAudioTransportParams(
@@ -86,7 +87,7 @@ class LocalMicrophoneBot:
         """Build the voice pipeline using the production pipeline builder."""
 
         # Use the core build_pipeline function but pass our local transport
-        pipeline, task, context = await build_pipeline(
+        pipeline, task, context, self._mcp_bridge = await build_pipeline(
             transport=self.transport, settings=self.settings, sample_rate=8000
         )
         self.context = context
@@ -132,6 +133,10 @@ class LocalMicrophoneBot:
         except Exception as e:
             logger.exception(f"Error during execution: {e}")
         finally:
+            # Clean up MCP bridge
+            if self._mcp_bridge is not None:
+                await self._mcp_bridge.disconnect()
+
             # Save transcript
             if self.context and self.context.get_messages():
                 transcript = format_transcript(self.context)

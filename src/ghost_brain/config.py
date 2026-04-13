@@ -22,6 +22,10 @@ class Settings(BaseSettings):
     twilio_account_sid: str = ""
     twilio_auth_token: str = ""
 
+    # MCP server for ObsidianPalace (Obsidian vault access).
+    # Set to empty string to disable the MCP bridge.
+    obsidian_palace_url: str = ""
+
     ai_name: str = "Orion"
     allowed_caller_id: str = ""
     system_instructions: str = (

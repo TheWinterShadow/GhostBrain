@@ -16,6 +16,7 @@ from ghost_brain.modules.ai.context import create_context_and_aggregators
 from ghost_brain.modules.ai.llm import create_llm
 from ghost_brain.modules.ai.stt import create_stt
 from ghost_brain.modules.ai.tts import create_tts
+from ghost_brain.tools.mcp_bridge import MCPBridge
 from ghost_brain.tools.search import search_web
 
 
@@ -79,7 +80,7 @@ async def build_pipeline(
     transport: BaseTransport,
     settings: Settings,
     sample_rate: int = 8000,
-) -> tuple[Pipeline, PipelineTask, LLMContext]:
+) -> tuple[Pipeline, PipelineTask, LLMContext, MCPBridge | None]:
     """Build the full Pipecat pipeline and task for the Ghost Brain bot.
 
     Args:
@@ -88,18 +89,46 @@ async def build_pipeline(
         sample_rate: Audio I/O sample rate.
 
     Returns:
-        Tuple of (pipeline, task, context).
+        Tuple of (pipeline, task, context, mcp_bridge).
+        mcp_bridge is None if ObsidianPalace is not configured.
     """
     stt = create_stt(settings, sample_rate=16000)
-    context, user_agg, assistant_agg = create_context_and_aggregators(sample_rate=16000)
     llm = create_llm(settings)
     tts = create_tts(settings)
 
     resampler = AudioResampler(input_rate=sample_rate, output_rate=16000)
 
-    logger.info("Initializing Native Web Search Tool...")
+    # --- MCP Bridge (ObsidianPalace) ---
+    mcp_bridge: MCPBridge | None = None
+    mcp_tools = None
+
+    if settings.obsidian_palace_url:
+        logger.info("Connecting to ObsidianPalace MCP server: %s", settings.obsidian_palace_url)
+        try:
+            mcp_bridge = MCPBridge(server_url=settings.obsidian_palace_url)
+            mcp_tools = await mcp_bridge.connect()
+            logger.info("ObsidianPalace MCP bridge connected — %d tools available", len(mcp_tools))
+        except Exception as exc:
+            logger.error("Failed to connect MCP bridge: %s — continuing without vault tools", exc)
+            mcp_bridge = None
+            mcp_tools = None
+    else:
+        logger.info("ObsidianPalace URL not configured — vault tools disabled")
+
+    # --- Context & Aggregators ---
+    context, user_agg, assistant_agg = create_context_and_aggregators(
+        sample_rate=16000,
+        extra_tools=mcp_tools,
+    )
+
+    # --- Tool Registration ---
+    logger.info("Registering Web Search tool...")
     llm.register_direct_function(search_web)
-    logger.info("Web Search Tool registered successfully!")
+    logger.info("Web Search tool registered")
+
+    if mcp_bridge is not None:
+        mcp_bridge.register_handlers(llm)
+        logger.info("MCP tool handlers registered with LLM")
 
     pipeline = Pipeline(
         [
@@ -120,4 +149,4 @@ async def build_pipeline(
         audio_out_sample_rate=sample_rate,
     )
     task = PipelineTask(pipeline, params=params)
-    return pipeline, task, context
+    return pipeline, task, context, mcp_bridge
